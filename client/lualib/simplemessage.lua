@@ -1,6 +1,5 @@
 local socket = require "simplesocket"
 local crypt = require "client.crypt"
---local protoloader = require "proto/sproto_mgr"
 local protobuf = require "proto/pb_mgr"
 
 local cjsonutil = require "cjson.util"
@@ -12,9 +11,7 @@ local var = {
 	object = {},
 }
 
-function message.register(server_proto)
-	--local index = protoloader.getindexbyname(server_proto)
-	--var.host, var.request = protoloader.loadbyclient(index)
+function message.register()
 end
 
 function message.peer(addr, port)
