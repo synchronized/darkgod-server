@@ -220,7 +220,7 @@ function client.set_config(config)
 	conf_client = config or {}
 end
 
-function client.init(name)
+function client.init()
 	return function ()
 		--local protod = skynet.uniqueservice "protod"
 		--local protoindex = assert(skynet.call(protod, "lua", "loadindex", name))

@@ -17,12 +17,9 @@ package.cpath = table.concat({
 }, ";")
 
 local crypt = require "client.crypt"
-local protoloader = require "proto/sproto_mgr"
 local message = require "simplemessage"
 local cjsonutil = require "cjson.util"
 local errcode = require "errcode.errcode"
-
-protoloader.init()
 
 local user = { username = USERNAME, password = PASSWORD }
 
@@ -137,7 +134,7 @@ function cli:update()
 	end
 end
 
-message.register(protoloader.LOGIN)
+message.register()
 message.peer(IP, 9777)
 message.connect()
 message.bind(cli, event)

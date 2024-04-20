@@ -1,7 +1,6 @@
 local skynet = require "skynet"
 local crypt = require "skynet.crypt"
 
-local protoloader = require "proto/sproto_mgr"
 local uuid = require "uuid"
 
 local service = require "service"
@@ -252,5 +251,5 @@ end
 service.init {
 	command = loginwork,
 	--info = users,
-	init = client.init (protoloader.LOGIN),
+	init = client.init (),
 }

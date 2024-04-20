@@ -6,7 +6,6 @@ local service = require "service"
 local client = require "client"
 local log = require "log"
 
-local protoloader = require "proto/sproto_mgr"
 local character_handler = require "agent.character_handler"
 local map_handler = require "agent.map_handler"
 local aoi_handler = require "agent.aoi_handler"
@@ -226,5 +225,5 @@ service.init {
 	require = {
 		"manager",
 	},
-	init = client.init (protoloader.GAME),
+	init = client.init (),
 }
