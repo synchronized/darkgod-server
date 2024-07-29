@@ -1,0 +1,48 @@
+#!/bin/bash
+
+echo "redis.setup"
+
+CURRDIR=$(cd "$(dirname "$0")";pwd)
+TEMPLATE="${CURRDIR}/redis.conf"
+
+if [[ $# -gt 0 ]]
+then
+	TARGET=$1
+else
+	TARGET="${CURRDIR}/var"
+fi
+
+if [[ $# -gt 1 ]]
+then
+	REDIS_NUM=$2
+else
+	REDIS_NUM=8
+fi
+
+if [ ! -d "${TARGET}" ]
+then
+	mkdir $TARGET
+fi
+
+BASEPORT=6379
+
+for i in `seq 0 ${REDIS_NUM}`
+do
+	NAME="redis${i}"
+	DIR="${TARGET}/${NAME}"
+	if [ ! -d "${DIR}" ]
+	then
+		mkdir $DIR
+	fi
+
+	PORT=$(($i + $BASEPORT))
+	PIDFILE="${NAME}.pid"
+	LOGFILE="${NAME}.log"
+	DBFILE="${NAME}.rdb"
+
+	cat ${TEMPLATE} |
+		sed "s@logfile \"\"@logfile ${LOGFILE}@g" |
+		sed "s@port 6379@port ${PORT}@g" |
+		sed "s@pidfile /var/run/redis.pid@pidfile ${PIDFILE}@g" |
+		sed "s@dbfilename dump.rdb@dbfilename ${DBFILE}@g" > ${DIR}/${NAME}.conf
+done

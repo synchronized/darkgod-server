@@ -1,0 +1,14 @@
+#!/bin/bash
+
+CURRDIR=$(cd "$(dirname "$0")";pwd)
+
+${CURRDIR}/redis-shutdown
+
+for i in `seq 0 32`
+do
+	NAME="redis${i}"
+	DIR="${CURRDIR}/${NAME}"
+	if [ -d ${DIR} ]; then
+		rm ${DIR}/${NAME}.rdb
+	fi
+done
