@@ -84,7 +84,7 @@ function event:res_auth(resp)
 	user.token = crypt.base64decode(resp.token)
 
 	-- 跳转到游戏服务器
-	message.sendmsg ("req_switchgame", nil)
+	--message.sendmsg ("req_switchgame", nil)
 
 	--message.register(protoloader.GAME)
 	self.authed = true

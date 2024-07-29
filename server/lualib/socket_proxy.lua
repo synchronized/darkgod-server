@@ -48,6 +48,12 @@ function proxy.write(fd, msg, sz)
 	skynet.send(get_addr(fd), "client", msg, sz)
 end
 
+function proxy.stop(fd)
+	if map[fd] then
+		skynet.send(get_addr(fd), "text", "S")
+	end
+end
+
 function proxy.close(fd)
 	if map[fd] then
 		skynet.send(get_addr(fd), "text", "K")

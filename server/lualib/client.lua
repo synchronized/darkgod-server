@@ -193,6 +193,10 @@ function client.close(fd)
 	proxy.close(fd)
 end
 
+function client.stop(fd)
+	proxy.stop(fd)
+end
+
 function client.sendmsg(c, msgname, data)
 	proxy.subscribe(c.fd)
 	if conf_client.islogmsg then

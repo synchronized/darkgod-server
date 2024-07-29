@@ -119,7 +119,7 @@ service_exit(struct skynet_context *ctx, struct package *P) {
 	while (!queue_empty(&P->request)) {
 		struct request req;
 		queue_pop(&P->request, &req);
-		skynet_send(ctx, 0, req.source, PTYPE_ERROR, req.session, NULL, 0);
+		skynet_send(ctx, 0, req.source, PTYPE_TEXT, req.session, NULL, 0);
 	}
 	while (!queue_empty(&P->response)) {
 		// drop the message
@@ -169,6 +169,14 @@ command(struct skynet_context *ctx, struct package *P, int session, uint32_t sou
 			req.source = source;
 			req.session = session;
 			queue_push(&P->request, &req);
+		}
+		break;
+	case 'S':
+		// stop 'R' (request a package)
+		if (!queue_empty(&P->request)) {
+			struct request req;
+			queue_pop(&P->request, &req);
+			skynet_send(ctx, 0, req.source, PTYPE_RESPONSE | PTYPE_TAG_DONTCOPY, req.session, NULL, 0);
 		}
 		break;
 	case 'K':
@@ -262,6 +270,7 @@ socket_message(struct skynet_context *ctx, struct package *P, const struct skyne
 		if (smsg->id != P->fd) {
 			skynet_error(ctx, "Invalid fd (%d), should be (%d)", smsg->id, P->fd);
 		} else {
+			skynet_error(ctx, "package fd (%d) closed", smsg->id);
 			// todo: log when SKYNET_SOCKET_TYPE_ERROR
 			response(ctx, P);
 			service_exit(ctx, P);

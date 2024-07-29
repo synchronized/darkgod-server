@@ -148,6 +148,7 @@ function cli:req_auth(args)
 		token = crypt.base64encode(token),
 	})
 	self.handle_type = handler_type.finish
+	client.stop(self.fd) --主动中断监听消息
 	return true
 end
 
