@@ -171,6 +171,13 @@ command(struct skynet_context *ctx, struct package *P, int session, uint32_t sou
 			queue_push(&P->request, &req);
 		}
 		break;
+	case 'S':
+		// stop 'R' (request a package)
+		if (!queue_empty(&P->request)) {
+			struct request req;
+			queue_pop(&P->request, &req);
+			skynet_send(ctx, 0, req.source, PTYPE_RESPONSE | PTYPE_TAG_DONTCOPY, req.session, NULL, 0);
+		}
 	case 'K':
 		// shutdown the connection
 		skynet_socket_shutdown(ctx, P->fd);
