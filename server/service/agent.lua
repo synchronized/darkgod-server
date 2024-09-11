@@ -1,5 +1,7 @@
 local skynet = require "skynet"
 
+local traceback = debug.traceback
+
 local service = require "service"
 local client = require "client"
 local log = require "log"
@@ -21,59 +23,102 @@ local combat_handler = require "agent.combat_handler"
 }
 ]]
 
-local user = {}
+local user = {
+	--fd = nil
+	--account_id = nil
+	REQUEST = {},
+	RESPONSE = {},
+	CMD = {},
+}
+
+local helper = {
+	last_heartbeat_time = 0,
+	HEARTBEAT_TIME_MAX = 60 * 100,
+
+	last_disconnect_time = 0,
+	DESTROY_TIME_MAX = 60 * 100,
+}
+
+function helper.closeconnect ()
+	if user.fd then
+		local fd = user.fd
+		local account_id = math.tointeger(user.account_id)
+		log ("agent fd=%d account_id=%d close connect", fd, account_id)
+
+		user.fd = nil
+		client.close(fd)
+		skynet.call(service.manager, "lua", "disconnect", account_id, fd)	-- report disconnect
+
+		helper.last_disconnect_time = skynet.now()
+		helper.checkdestroy()
+	end
+end
+
+function helper.kickagent ()
+	helper.closeconnect()
+	if user.account_id then
+		local fd = math.tointeger(user.fd)
+		local account_id = math.tointeger(user.account_id)
+		log ("agent fd=%d account_id=%d kick agent", fd, account_id)
+		skynet.call(service.manager, "lua", "kick", account_id)	-- report kick
+	end
+end
+
+--检查心跳
+function helper.checkheartbeat ()
+	if helper.HEARTBEAT_TIME_MAX <= 0 or not user.fd then return end
+
+	local t = helper.last_heartbeat_time + helper.HEARTBEAT_TIME_MAX - skynet.now ()
+	if t <= 0 then
+		if user.fd or user.account_id then
+			local fd = math.tointeger(user.fd)
+			local account_id = math.tointeger(user.account_id)
+			log ("agent fd=%d account_id=%d close connect for heatbeat timeout", fd, account_id)
+		end
+		helper.closeconnect()
+		return
+	end
+	skynet.timeout (t, helper.checkheartbeat)
+end
+
+--检查断开连接后
+function helper.checkdestroy ()
+	if helper.DESTROY_TIME_MAX <= 0 or user.fd then return end
+
+	local t = helper.last_disconnect_time + helper.DESTROY_TIME_MAX - skynet.now ()
+	if t <= 0 then
+		if user.fd or user.account_id then
+			local fd = math.tointeger(user.fd)
+			local account_id = math.tointeger(user.account_id)
+			log ("agent fd=%d account_id=%d kick for disconnect timeout", fd, account_id)
+		end
+		helper.kickagent ()
+		return
+	end
+	skynet.timeout (t, helper.checkdestroy)
+end
 
 local cli = client.handler()
 
 function cli:ping()
 	-- log ("account_id: %d ping", tonumber(user.account_id))
+	helper.last_heartbeat_time = skynet.now()
 	return nil
-end
-
-local function kick_agent ()
-	if user.account_id then
-		log ("agent kicked")
-		skynet.call(service.manager, "lua", "kick", user.account_id)	-- report exit
-	end
-end
-
-local last_heartbeat_time
-local HEARTBEAT_TIME_MAX = 0 -- 60 * 100
-local function heartbeat_check ()
-	if HEARTBEAT_TIME_MAX <= 0 or not user.fd then return end
-
-	local t = last_heartbeat_time + HEARTBEAT_TIME_MAX - skynet.now ()
-	if t <= 0 then
-		log ("heatbeat check failed")
-		kick_agent ()
-	else
-		skynet.timeout (t, heartbeat_check)
-	end
 end
 
 local agent = {
 	-- CMD = {}
 }
 
-local function new_user()
+local function start_agent()
 	assert(user, string.format("invalid user data"))
 	local fd = user.fd
 	local account_id = user.account_id
 	local ok, error = pcall(client.dispatch, user)
-	log("fd=%d is gone. error = %s", fd, tostring(error))
-	client.close(fd)
-	if user.fd == fd then
-		user.fd = nil
-		skynet.sleep(1000)	-- exit after 10s
-		if user.fd == nil then
-			-- double check
-			if not user.exit then
-				user.exit = true	-- mark exit
-				kick_agent()
-				log("user %s afk", account_id)
-			end
-		end
+	if not ok then
+		log("agent fd=%d, account_id=%d is gone. error = %s", fd, account_id, tostring(error))
 	end
+	helper.closeconnect()
 end
 
 function agent.init (conf)
@@ -82,42 +127,40 @@ end
 
 function agent.assign (fd, account_id)
 	if user.fd then
-		error(string.format(
-			"agent repeat assign account_id: %d, new account_id: %d",
-			user.account_id, account_id))
+		error(string.format("agent repeat assign account_id: %d, fd: %d, new account_id: %d, fd:%d",
+			user.account_id, user.fd, account_id, fd))
 	end
 
-	log ("agent account_id: %d has created", account_id)
+	log ("agent fd=%d account_id=%d has created", fd, account_id)
 
-	if user.account_id == account_id then
-		user.fd = fd
-		user.exit = nil
-	else
-		user = {
-			fd = fd,
-			account_id = account_id,
-			REQUEST = {},
-			RESPONSE = {},
-			CMD = {},
-		}
-	end
+	user.fd = fd
+	user.account_id = account_id
 
 	agent.CMD = user.CMD
 
 	character_handler:register(user)
 
-	last_heartbeat_time = skynet.now ()
-	heartbeat_check ()
+	--开始检查心跳
+	helper.last_heartbeat_time = skynet.now ()
+	helper.checkheartbeat ()
 
-	skynet.fork(new_user)
+	skynet.fork(start_agent)
 	return true
 end
 
-function agent.close()
-	log.printf ("agent closed account_id: %d", user.account_id)
+function agent.kick ()
+	if user.fd or user.account_id then
+		local fd = math.tointeger(user.fd)
+		local account_id = math.tointeger(user.account_id)
+		log.printf ("agent fd=%d account_id=%d closed", fd, account_id)
+	end
 
+	if user.fd then
+		local fd = user.fd
+		user.fd = nil
+		client.close(fd)
+	end
 	if user.account_id then
-		local account_id = user.account_id
 		if user.map then
 			skynet.call (user.map, "lua", "character_leave", user.character.id)
 		end
@@ -127,21 +170,19 @@ function agent.close()
 		end
 
 		character_handler.save (user.character)
+		character_handler:unregister(user)
 
-		user = {}
+		user.account_id = nil
 		agent.CMD = nil
-
-		skynet.call (service.manager, "lua", "exit", account_id)
 	end
-end
-
-function agent.kick ()
-	kick_agent()
+	skynet.call (service.manager, "lua", "close", skynet.self())
 end
 
 function agent.world_enter (world)
-	log ("agent character: %d(%s) world enter",
-		user.character.id, user.character.general.name)
+	if user.character then
+		log ("agent character: %d(%s) world enter",
+			user.character.id, user.character.general.name)
+	end
 
 	user.world = world
 	character_handler:unregister(user)
@@ -156,8 +197,10 @@ function agent.world_leave (character_id)
 end
 
 function agent.map_enter (map)
-	log ("agent character: %d(%s) map enter",
-		user.character.id, user.character.general.name)
+	if user.character then
+		log ("agent character: %d(%s) map enter",
+			user.character.id, user.character.general.name)
+	end
 
 	user.map = map
 
