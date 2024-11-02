@@ -1,0 +1,2 @@
+return 
+{mainCityMapId=10000,playerPrefabCity="PrefabPlayer/AssassinCity",beginLevel=1,beginGuideId=1001,autoTaskDefaultHead="Images/task",langProfessionName=100,defaultGuideBodyPath="Images/npcguide",}

@@ -1,0 +1,9 @@
+return
+{
+[1001] = {id=1001,npcId=1,dilogs={{speaker=1,content="智者您好，晚辈$name,前来拜会。",},{speaker=2,content="漫漫人生路，你我得以相遇也是一种缘分。我看你骨骼精奇，眉宇间正气凛然，将来定能成就一番事业。",},{speaker=1,content="智者过誉了，晚辈阅历尚浅，学识浅薄，空有满腔热血，还请前辈多多教导。",},{speaker=2,content="教导谈不上，但我现有一事可交付与你，若你能办妥，对你而言也是一种历练。你可有意为之？",},{speaker=1,content="能为智者办事，是晚辈的福分，定当竭尽所能，请您明示。",},{speaker=2,content="甚好，此事我已安排妥当，你去主城找凯伦将军，他会告诉你怎么做。",},{speaker=1,content="好的，晚辈即刻启程。",},},act_id=0,rewardList={rewards={{rewardDefineId=2,num=65,},{rewardDefineId=3,num=80,},},},},
+[1002] = {id=1002,npcId=2,dilogs={{speaker=1,content="将军，晚辈$name,乃智者派遣前来，说有一事交付于我",},{speaker=2,content="你终于来了，我已经在此地等候多时了。智者果然没有看错人。",},{speaker=1,content="全凭智者提携晚辈，才有机会谋得此事。定当竭尽所能，以尽绵薄之力。",},{speaker=2,content="距离此地10里荒原之处，常有兽匪出没，滋扰边境，现派你去侦察敌情，以便大军及时过境。",},{speaker=1,content="请将军放心，我即刻出发，尽快查实情况。",},},act_id=1,rewardList={rewards={{rewardDefineId=2,num=75,},{rewardDefineId=3,num=90,},},},},
+[1003] = {id=1003,npcId=3,dilogs={{speaker=1,content="老板，你好，我需要对自己的装备进行修复更新。请问你能帮我吗？",},{speaker=2,content="少侠好眼力，我是全城最好的工匠，没有之一。你来找我算是来对地方了。",},{speaker=1,content="甚好甚好，那就麻烦你了。",},{speaker=2,content="不麻烦，你只要有钱就行了。谁也不会和钱过不去，对么？",},},act_id=2,rewardList={rewards={{rewardDefineId=2,num=85,},{rewardDefineId=3,num=100,},},},},
+[1004] = {id=1004,npcId=4,dilogs={{speaker=2,content="江湖路漫漫，耗神又废力，你需要补充一些体力了。",},{speaker=1,content="休息是为了走更远的路，翻越更高的山，我需要补充一些体力了。",},},act_id=3,rewardList={rewards={{rewardDefineId=2,num=95,},{rewardDefineId=3,num=110,},},},},
+[1005] = {id=1005,npcId=4,dilogs={{speaker=2,content="钱不是万能的，但没钱是万万不能的。",},{speaker=1,content="是时候让自己的口袋充实一些了。",},},act_id=4,rewardList={rewards={{rewardDefineId=2,num=105,},{rewardDefineId=3,num=120,},},},},
+[1006] = {id=1006,npcId=-1,dilogs={{speaker=2,content="沟通能接近彼此之间的距离。如果没能拉近，肯定是你没有说普通话。",},{speaker=1,content="是时候让世界听到我的声音了。",},},act_id=5,rewardList={rewards={{rewardDefineId=2,num=115,},{rewardDefineId=3,num=130,},},},},
+}
