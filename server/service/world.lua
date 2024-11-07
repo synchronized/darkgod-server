@@ -1,8 +1,9 @@
 local skynet = require "skynet"
 
 local log = require "log"
+local cjsonutil = require "cjson.util"
 
-local mapdata = require "gddata.map"
+local conf_map_list = require "gddata.gamedata.Data.config_map"
 
 local CMD = {}
 local map_instance = {}
@@ -27,7 +28,7 @@ function CMD.character_enter (agent, character_id, map, pos)
 	online_character[character_id] = userdata
 	local m = map_instance[map]
 	if not m then
-		log ("agent map not found map: %s", map)
+		log ("agent map not found map: %s userdata: %s", map, cjsonutil.serialise_value(userdata))
 		CMD.kick (character_id)
 		return
 	end
@@ -49,11 +50,10 @@ end
 
 skynet.start (function ()
 	local self = skynet.self ()
-	for _, conf in pairs (mapdata) do
-		local name = conf.name
+	for map_id, conf_map in pairs (conf_map_list) do
 		local s = skynet.newservice ("map", self)
-		skynet.call (s, "lua", "init", conf)
-		map_instance[name] = s
+		skynet.call (s, "lua", "init", conf_map)
+		map_instance[map_id] = s
 	end
 	
 	skynet.dispatch ("lua", function (_, source, command, ...)
