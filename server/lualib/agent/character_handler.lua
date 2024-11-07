@@ -47,31 +47,33 @@ local function check_character (account_id, character_id)
 	return false
 end
 
-local function create (name, race, class)
+local function create (name, race, profession)
 	if not name then return errcode.CHARACTER_INVLID_CHARACTER_NAME end
 	if not race then return errcode.CHARACTER_INVLID_CHARACTER_RACE end
-	if not class then return errcode.CHARACTER_INVLID_CHARACTER_CLASS end
+	if not profession then return errcode.CHARACTER_INVLID_CHARACTER_PROFESSION end
 	if #name <= 2 or #name > 24 then
 		log (string.format("invalid character name: %s", name))
 		return errcode.CHARACTER_INVLID_CHARACTER_NAME
 	end
-	if not gdd.race[race] then
+	if not gdd.racelevel[race] then
 		log (string.format("invalid character race: %s", race))
 		return errcode.CHARACTER_INVLID_CHARACTER_RACE
 	end
-	if not gdd.class[class] then
-		log (string.format("invalid character class: %s", class))
-		return errcode.CHARACTER_INVLID_CHARACTER_CLASS
+	if not gdd.professionlevel[profession] then
+		log (string.format("invalid character profession: %s", profession))
+		return errcode.CHARACTER_INVLID_CHARACTER_PROFESSION
 	end
 
-	local race_info = gdd.race[race]
+	local main_city_map_id = gdd.globalconfig.main_city_map_id
+	local conf_city = gdd.map[main_city_map_id]
+	local player_bron_pos = conf_city.player_born_pos
 
 	local character = {
 		general = {
 			name = name,
 			race = race,
-			class = class,
-			map = race_info.home,
+			profession = profession,
+			map = main_city_map_id,
 		},
 		attribute = {
 			level = math.tointeger(1),
@@ -80,10 +82,9 @@ local function create (name, race, class)
 		movement = {
 			mode = 0,
 			pos = {
-				x = race_info.pos_x,
-				y = race_info.pos_y,
-				z = race_info.pos_z,
-				o = race_info.pos_o,
+				x = player_bron_pos.x,
+				y = player_bron_pos.y,
+				z = player_bron_pos.z,
 			 },
 		},
 	}
@@ -102,17 +103,18 @@ local function on_enter_world (character)
 		attribute = temp_attribute[attribute_count],
 	}
 
-	local class = character.general.class
+	local profession = character.general.profession
 	local race = character.general.race
 	local level = math.tointeger(character.attribute.level)
 
-
-	local gda = gdd.attribute
+	local professionAttribute = gdd.professionlevel[profession].attribute
+	local raceAttribute = gdd.racelevel[race].attribute
 
 	local base = temp_attribute[1]
-	base.health_max = gda.health_max[class][level]
-	base.strength = gda.strength[race][level]
-	base.stamina = gda.stamina[race][level]
+
+	base.health_max = professionAttribute[level].healthMax
+	base.strength = raceAttribute[level].strength
+	base.stamina = raceAttribute[level].stamina
 	base.attack_power = 0
 
 	local last = temp_attribute[attribute_count - 1]
@@ -162,7 +164,7 @@ function REQUEST:req_character_create (args)
 
 	log ("<character_create> args: "..cjsonutil.serialise_value(char_req, "  "))
 
-	local ret, character = create(char_req.name, char_req.race, char_req.class)
+	local ret, character = create(char_req.name, char_req.race, char_req.profession)
 	if ret then
 		return ret -- 创建角色失败
 	end
@@ -171,7 +173,7 @@ function REQUEST:req_character_create (args)
 	local character_id = skynet.call(database, "lua", "character", "reserve", uuid.gen(), char_name)
 	if not character_id then
 		log ("    character_name: %s already exist", char_name)
-		return errcode.CHARACTER_INVLID_CHARACTER_ID
+		return errcode.CHARACTER_INVLID_CHARACTER_NAME
 	end
 
 	character.id = character_id
@@ -241,7 +243,8 @@ function REQUEST:req_character_pick (args)
 	local map = user.character.general.map
 	local pos =  user.character.movement.pos
 	skynet.call (world, "lua", "character_enter", character_id, map, pos)
-
+	log ("type(user.character.movement.pos.y): %s", type(user.character.movement.pos.y))
+user.character.movement.pos.y = 1.1
 	client.sendmsg(self, "res_character_pick", { character = character })
 	return true
 end
