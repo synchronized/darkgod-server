@@ -21,6 +21,8 @@ local message = require "simplemessage"
 local cjsonutil = require "cjson.util"
 local errcode = require "errcode.errcode"
 
+local gddata = require "gddata.gamedata.Schema.schema"
+
 local user = { username = USERNAME, password = PASSWORD }
 
 do
@@ -83,7 +85,6 @@ function event:res_auth(resp)
 	-- 跳转到游戏服务器
 	--message.sendmsg ("req_switchgame", nil)
 
-	--message.register(protoloader.GAME)
 	self.authed = true
 
 	-- 请求角色列表
@@ -91,6 +92,8 @@ function event:res_auth(resp)
 end
 
 function event:res_character_list (resp)
+	print(string.format("<== RESPONSE res_character_list resp: %s",
+						cjsonutil.serialise_value(resp)))
 	resp = resp or {}
 	local character = resp.character or {}
 
@@ -100,8 +103,8 @@ function event:res_character_list (resp)
 		message.sendmsg("req_character_create", {
 			character = {
 				name = string.format("%s-%s", user.username, "hello"),
-				race = "human",
-				class = "warrior" ,
+				race = gddata.enums['common.ERaceType'].HUMAN,
+				profession = gddata.enums['common.EProfessionType'].WARRIOR,
 			},
 		})
 	else

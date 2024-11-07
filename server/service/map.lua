@@ -12,7 +12,13 @@ local CMD = {}
 
 function CMD.init (w, c)
 	conf = c
-	aoi.init (conf.bbox, conf.radius)
+	local bbox = {
+		left = conf.bbox.center.x - conf.bbox.extents.x,
+		top = conf.bbox.center.y - conf.bbox.extents.y,
+		right = conf.bbox.center.x + conf.bbox.extents.x,
+		bottom = conf.bbox.center.y + conf.bbox.extents.y,
+	}
+	aoi.init (bbox, conf.radius)
 end
 
 function CMD.character_enter (_, agent, character_id)

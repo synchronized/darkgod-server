@@ -20,7 +20,7 @@ local errcode = {
 	CHARACTER_INVLID_CHARACTER_ID = 20001, -- character_id 有误
 	CHARACTER_INVLID_CHARACTER_NAME = 20002, -- character name 有误
 	CHARACTER_INVLID_CHARACTER_RACE = 20003, -- character 种族/阵营有误
-	CHARACTER_INVLID_CHARACTER_CLASS = 20004, -- character 职业有误
+	CHARACTER_INVLID_CHARACTER_PROFESSION = 20004, -- character 职业有误
 	CHARACTER_SAVE_DATA_FAILED = 20005, -- 保存数据失败
 	CHARACTER_LOAD_DATA_FAILED = 20006, -- 加载数据失败
 
@@ -52,7 +52,7 @@ local errmsg = {
 	[errcode.CHARACTER_INVLID_CHARACTER_ID] = "character_id 有误",
 	[errcode.CHARACTER_INVLID_CHARACTER_NAME] = "character name 有误",
 	[errcode.CHARACTER_INVLID_CHARACTER_RACE] = "character 种族/阵营有误",
-	[errcode.CHARACTER_INVLID_CHARACTER_CLASS] = "character 职业有误",
+	[errcode.CHARACTER_INVLID_CHARACTER_PROFESSION] = "character 职业有误",
 	[errcode.CHARACTER_SAVE_DATA_FAILED] = "保存数据失败",
 	[errcode.CHARACTER_LOAD_DATA_FAILED] = "加载数据失败",
 
