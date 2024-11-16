@@ -87,8 +87,8 @@ function helper.checkdestroy ()
 	local t = helper.last_disconnect_time + helper.DESTROY_TIME_MAX - skynet.now ()
 	if t <= 0 then
 		if user.fd or user.account_id then
-			local fd = math.tointeger(user.fd)
-			local account_id = math.tointeger(user.account_id)
+			local fd = math.tointeger(user.fd) or 0
+			local account_id = math.tointeger(user.account_id) or 0
 			log ("agent fd=%d account_id=%d kick for disconnect timeout", fd, account_id)
 		end
 		helper.kickagent ()
