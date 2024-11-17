@@ -3,6 +3,7 @@ local crypt = require "client.crypt"
 local protobuf = require "proto/pb_mgr"
 
 local cjsonutil = require "cjson.util"
+require "extra.stringext"
 
 local message = {}
 local var = {
@@ -32,8 +33,8 @@ function message.disconnect()
 	socket.close()
 end
 
-function message.bind(obj, handler)
-	var.object[obj] = handler
+function message.bind(module_name, handler)
+	var.object[module_name] = handler
 end
 
 function message.read(ti)
@@ -50,7 +51,7 @@ function message.sendmsg(name, args, callback)
 
 	local bytes_body = ""
 	if args then
-		bytes_body = assert(protobuf.encode('proto.'..name, args))
+		bytes_body = assert(protobuf.encode(name, args))
 	end
 	local msg = string.pack(">s2>I4>s2", name, var.session_id, bytes_body)
 
@@ -70,10 +71,10 @@ function message.dispatch_pb(ti)
 
 	local resp = nil
 	if #bytes_body > 0 then
-		resp = assert(protobuf.decode('proto.'..msgname, bytes_body))
+		resp = assert(protobuf.decode(msgname, bytes_body))
 	end
 
-	if msgname == "res_msgresult" then
+	if msgname == "common.on_msgresult" then
 		if resp then
 			local client_session_id = resp.session
 			local session = var.session[client_session_id]
@@ -90,19 +91,31 @@ function message.dispatch_pb(ti)
 			print(string.format("    session %s resp is nil", msgname))
 		end
 	else
-		if msgname ~= "ping" then
+		if msgname ~= "common.pong" then
 			print(string.format("<== RESPONSE %s data: %s", msgname, cjsonutil.serialise_value(resp)))
 		end
-		for obj, handler in pairs(var.object) do
-			local f = handler[msgname]
-			if f then
-				local ok, err_msg = pcall(f, obj, resp)
-				if not ok then
-					print(string.format("    session %s for [%s] error : %s", tostring(msgname), tostring(obj), tostring(err_msg)))
-				end
-			else
-				print(string.format("    session %s for [%s] have no handler", tostring(msgname), tostring(obj)))
-			end
+		local msgnames = msgname:split('.')
+		if #msgnames < 2 then
+			print(string.format("    invalid msgname: %s data: %s", 
+				msgname, cjsonutil.serialise_value(resp)))
+			return
+		end
+		local module_name = msgnames[1]
+		local func_name = msgnames[2]
+		local module_handler = var.object[module_name]
+		if module_handler == nil then
+			print(string.format("    need register module handler msgname: %s", msgname))
+			return
+		end
+		local func_handler = module_handler[func_name]
+		if func_handler == nil then
+			print(string.format("    session have no handler msgname: %s", tostring(msgname)))
+			return
+		end
+		local ok, err_msg = pcall(func_handler, module_handler, resp)
+		if not ok then
+			print(string.format("    session failed msgname: %s error : %s",
+				tostring(msgname), tostring(err_msg)))
 		end
 	end
 

@@ -7,7 +7,7 @@ local log = require "log"
 
 local REQUEST = {}
 local user
-handler = handler.new (REQUEST)
+handler = handler.new ('map', REQUEST)
 
 handler:init (function (u)
 	user = u

@@ -10,17 +10,12 @@ local cjsonutil = require "cjson.util"
 
 local traceback = debug.traceback
 
+require "extra.stringext"
+
 local client = {}
 local host
-local sender
 local handler = {}
 local conf_client = {}
-
-local var = {
-	session_id = 0 ,
-	session = {},
-	object = {},
-}
 
 function client.handler()
 	return handler
@@ -45,68 +40,7 @@ function client.write( fd, luastring)
 	proxy.write(fd, skynet.pack(luastring))
 end
 
-local emptytable = {}
-function client.dispatch_message( c )
-	local fd = c.fd
-	proxy.subscribe(fd)
-	while true do
-		local msg, sz = proxy.read(fd)
-		local type, session_id, args, fnresponse = host:dispatch(msg, sz)
-		if c.exit then
-			return c
-		end
-		if type == "REQUEST" then
-			local typename = session_id
-			local f = c.REQUEST and c.REQUEST[typename] or handler[typename] -- session_id is request type
-			if not f then
-				-- unsupported command, disconnected
-				error(string.format("request %s have no handler", typename))
-			else
-				-- f may block , so fork and run
-				skynet.fork(function()
-					local ok, err, resp = xpcall(f, traceback, c, args)
-					log("=============typename: %s, ok:%s, err:%s, resp:%s", typename, tostring(ok), tostring(err), tostring(resp))
-					if not ok then
-						log.printf("<error> response error = %s", err)
-						if fnresponse then
-							proxy.write(fd, fnresponse(emptytable, {
-								ok = false,
-								error_code = errcode.COMMON_SERVER_ERROR,
-							}))
-						end
-					elseif err ~= nil and err ~= errcode.SUCCESS  then
-						if fnresponse then
-							proxy.write(fd, fnresponse(resp or emptytable, {error_code = err}))
-						end
-					else
-						if fnresponse then
-							proxy.write(fd, fnresponse(resp or emptytable))
-						end
-					end
-				end)
-			end
-		else
-			local session = assert(var.session[session_id], string.format("invalid push session id: %d", session_id))
-			var.session[session_id] = nil
-
-			local f = c.RESPONSE and c.RESPONSE[session.name] or handler[session.name]
-			if not f then
-				-- unsupported response, disconnected
-				error(string.format("session %s[%d] have no handler", session.name, session_id))
-			else
-				-- f may block , so fork and run
-				skynet.fork(function()
-					local ok, err = xpcall(f, traceback, c, session.req, args)
-					if not ok then
-						error(string.format("    session %s[%d] for [%s] error : %s", session.name, session_id, tostring(err)))
-					end
-				end)
-			end
-		end
-	end
-end
-
-function client.dispatch( c )
+function client.dispatch( c, ext_handlers)
 	local fd = c.fd
 	proxy.subscribe(fd)
 	while true do
@@ -128,14 +62,27 @@ function client.dispatch( c )
 
 		local args = nil
 		if #bytes_body > 0 then
-			args = assert(protobuf.decode('proto.'..msgname, bytes_body))
+			args = assert(protobuf.decode(msgname, bytes_body))
 		end
 		if conf_client.islogmsg then
 			log("=============receivemsg msgname:%s, bytes_body:%s|", msgname, crypt.base64encode(bytes_body))
 			log("=============receivemsg msgname:%s, data:%s", msgname, cjsonutil.serialise_value(args))
 		end
 
-		local f = c.REQUEST and c.REQUEST[msgname] or handler[msgname] -- session_id is request type
+		local msgnames = msgname:split('.')
+		if #msgnames < 2 then
+			error(string.format("invalid msgname: %s", msgname))
+			return
+		end
+		local cname = msgnames[1]
+		local fname = msgnames[2]
+
+		-- session_id is request type
+		local f = ext_handlers and
+			ext_handlers[cname] and
+			ext_handlers[cname].REQUEST and
+			ext_handlers[cname].REQUEST[fname] or
+			handler[fname]
 		if not f then
 			-- unsupported command, disconnected
 			error(string.format("request %s have no handler", msgname))
@@ -182,7 +129,7 @@ function client.dispatch( c )
 					--error()
 				end
 				if msgresult ~= nil then
-					client.sendmsg(c, 'res_msgresult', msgresult)
+					client.sendmsg(c, 'common.on_msgresult', msgresult)
 				end
 			end)
 		end
@@ -204,7 +151,7 @@ function client.sendmsg(c, msgname, data)
 	end
 	local bytes_body = ""
 	if data then
-		bytes_body = assert(protobuf.encode('proto.'..msgname, data))
+		bytes_body = assert(protobuf.encode(msgname, data))
 	end
 	local bytemsg = string.pack(">s2>s2", msgname, bytes_body)
 

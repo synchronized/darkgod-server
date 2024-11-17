@@ -8,7 +8,7 @@ local aoi_handler = require "agent.aoi_handler"
 local REQUEST = {}
 local CMD = {}
 local user
-handler = handler.new (REQUEST, nil, CMD)
+handler = handler.new ('combat', REQUEST, nil, CMD)
 
 handler:init (function (u)
 	user = u

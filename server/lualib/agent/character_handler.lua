@@ -12,7 +12,7 @@ local client = require "client"
 local handler = require "agent.handler"
 
 local REQUEST = {}
-handler = handler.new (REQUEST)
+handler = handler.new ('character', REQUEST)
 
 local user
 local database
@@ -167,7 +167,7 @@ local function on_enter_world (character)
 	return character
 end
 
-function REQUEST:req_character_list ()
+function REQUEST:list ()
 	local char_list = load_list (user.account_id)
 	log ("<character_list> account_id: "..tostring(user.account_id)..", char_list: "..cjsonutil.serialise_value(char_list, "  "))
 	local character = {}
@@ -179,11 +179,11 @@ function REQUEST:req_character_list ()
 	end
 
 	log ("    character-list: "..cjsonutil.serialise_value(character, "  "))
-	client.sendmsg(self, "res_character_list", { character = character })
+	client.sendmsg(self, "character.on_list", { character = character })
 	return true
 end
 
-function REQUEST:req_character_create (args)
+function REQUEST:create (args)
 	if not args then
 		return errcode.COMMON_INVALID_REQUEST_PARMS
 	end
@@ -222,11 +222,11 @@ function REQUEST:req_character_create (args)
 		return errcode.CHARACTER_SAVE_DATA_FAILED
 	end
 
-	client.sendmsg(self, "res_character_create", { character = character })
+	client.sendmsg(self, "character.on_create", { character = character })
 	return true
 end
 
-function REQUEST:req_character_pick (args)
+function REQUEST:pick (args)
 	if not args then
 		return errcode.COMMON_INVALID_REQUEST_PARMS
 	end
@@ -246,7 +246,7 @@ function REQUEST:req_character_pick (args)
  		log ("    current character_id: %d", user.character.id)
 		-- 已经选择过角色, 如果是当前角色直接返回
 		if user.character.id == character_id then
-			client.sendmsg(self, "res_character_pick", { character = user.character })
+			client.sendmsg(self, "character.on_pick", { character = user.character })
 			return true
 		end
 
@@ -275,7 +275,7 @@ function REQUEST:req_character_pick (args)
 	local pos =  user.character.movement.pos
 	skynet.call (world, "lua", "character_enter", character_id, map, pos)
 	log ("    character-pick: "..cjsonutil.serialise_value(character, "  "))
-	client.sendmsg(self, "res_character_pick", { character = character })
+	client.sendmsg(self, "character.on_pick", { character = character })
 	return true
 end
 

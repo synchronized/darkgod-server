@@ -5,6 +5,7 @@ local service = {}
 
 function service.init(mod)
 	local handler = mod.command
+	local ext_handlers = mod.ext_handlers
 	if mod.info then
 		skynet.info_func(function()
 			return mod.info
@@ -21,7 +22,18 @@ function service.init(mod)
 			mod.init()
 		end
 		skynet.dispatch("lua", function (_,_, cmd, ...)
-			local f = handler.CMD and handler.CMD[cmd] or handler[cmd]
+			local f = nil
+			if ext_handlers then
+				for _, ext_handler in pairs(ext_handlers) do
+					f = ext_handler and ext_handler.CMD and ext_handler.CMD[cmd] or ext_handler[cmd]
+					if f ~= nil then
+						break
+					end
+				end
+			end
+			if f == nil then
+				f = handler[cmd]
+			end
 			if f then
 				skynet.ret(skynet.pack(f(...)))
 			else

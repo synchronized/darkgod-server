@@ -40,7 +40,7 @@ local kick = function(user)
 	end
 end
 
-function cli:req_handshake(args)
+function cli:handshake(args)
 	if self.handle_type ~= handler_type.handshake then
 		kick(self)
 		return errcode.LOGIN_INVALID_HANDLE_TYPE --请求协议有误
@@ -64,13 +64,13 @@ function cli:req_handshake(args)
 	self.secret = crypt.dhsecret(self.clientkey, self.serverkey)
 
 	self.handle_type = handler_type.challenge
-	client.sendmsg(self, 'res_handshake', {
+	client.sendmsg(self, 'login.on_handshake', {
 		secret = crypt.base64encode(crypt.dhexchange(self.serverkey)),
 	})
 	return true
 end
 
-function cli:req_challenge(args)
+function cli:challenge(args)
 	if self.handle_type ~= handler_type.challenge then
 		kick(self)
 		return errcode.LOGIN_INVALID_HANDLE_TYPE --请求协议有误
@@ -93,7 +93,7 @@ function cli:req_challenge(args)
 	return true
 end
 
-function cli:req_auth(args)
+function cli:auth(args)
 	if self.handle_type ~= handler_type.auth then
 		kick(self)
 		return errcode.LOGIN_INVALID_HANDLE_TYPE --请求协议有误
@@ -141,7 +141,7 @@ function cli:req_auth(args)
 
 	self.exit = true
 
-	client.sendmsg(self, 'res_auth', {
+	client.sendmsg(self, 'login.on_auth', {
 		login_session = login_session,
 		expire = session_expire_time_in_second,
 		token = crypt.base64encode(token),
@@ -182,7 +182,7 @@ local function auth (fd, addr)
 	end)
 
 	-- acknowledgment
-	client.sendmsg(user, "res_acknowledgment", {
+	client.sendmsg(user, "login.on_acknowledgment", {
 		acknumber = crypt.base64encode(user.acknumber),
 	})
 
