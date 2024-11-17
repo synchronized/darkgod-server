@@ -11,6 +11,9 @@ local map_handler = require "agent.map_handler"
 local aoi_handler = require "agent.aoi_handler"
 local combat_handler = require "agent.combat_handler"
 
+local ext_handlers = {
+}
+
 --[[
 .user {
 	fd : integer
@@ -25,9 +28,6 @@ local combat_handler = require "agent.combat_handler"
 local user = {
 	--fd = nil
 	--account_id = nil
-	REQUEST = {},
-	RESPONSE = {},
-	CMD = {},
 }
 
 local helper = {
@@ -41,7 +41,7 @@ local helper = {
 function helper.closeconnect ()
 	if user.fd then
 		local fd = user.fd
-		local account_id = math.tointeger(user.account_id)
+		local account_id = math.tointeger(user.account_id) or 0
 		log ("agent fd=%d account_id=%d close connect", fd, account_id)
 
 		user.fd = nil
@@ -56,8 +56,8 @@ end
 function helper.kickagent ()
 	helper.closeconnect()
 	if user.account_id then
-		local fd = math.tointeger(user.fd)
-		local account_id = math.tointeger(user.account_id)
+		local fd = math.tointeger(user.fd) or 0
+		local account_id = math.tointeger(user.account_id) or 0
 		log ("agent fd=%d account_id=%d kick agent", fd, account_id)
 		skynet.call(service.manager, "lua", "kick", account_id)	-- report kick
 	end
@@ -70,8 +70,8 @@ function helper.checkheartbeat ()
 	local t = helper.last_heartbeat_time + helper.HEARTBEAT_TIME_MAX - skynet.now ()
 	if t <= 0 then
 		if user.fd or user.account_id then
-			local fd = math.tointeger(user.fd)
-			local account_id = math.tointeger(user.account_id)
+			local fd = math.tointeger(user.fd) or 0
+			local account_id = math.tointeger(user.account_id) or 0
 			log ("agent fd=%d account_id=%d close connect for heatbeat timeout", fd, account_id)
 		end
 		helper.closeconnect()
@@ -100,20 +100,23 @@ end
 local cli = client.handler()
 
 function cli:ping()
-	-- log ("account_id: %d ping", tonumber(user.account_id))
+	--log ("account_id: %d ping", tonumber(user.account_id))
 	helper.last_heartbeat_time = skynet.now()
 	return nil
 end
 
 local agent = {
-	-- CMD = {}
 }
 
 local function start_agent()
+	log("============name:", #ext_handlers)
+	for name, _ in pairs(ext_handlers) do
+		log("name:", name)
+	end
 	assert(user, string.format("invalid user data"))
 	local fd = user.fd
 	local account_id = user.account_id
-	local ok, error = pcall(client.dispatch, user)
+	local ok, error = pcall(client.dispatch, user, ext_handlers)
 	if not ok then
 		log("agent fd=%d, account_id=%d is gone. error = %s", fd, account_id, tostring(error))
 	end
@@ -135,9 +138,7 @@ function agent.assign (fd, account_id)
 	user.fd = fd
 	user.account_id = account_id
 
-	agent.CMD = user.CMD
-
-	character_handler:register(user)
+	character_handler:register(user, ext_handlers)
 
 	--开始检查心跳
 	helper.last_heartbeat_time = skynet.now ()
@@ -149,8 +150,8 @@ end
 
 function agent.kick ()
 	if user.fd or user.account_id then
-		local fd = math.tointeger(user.fd)
-		local account_id = math.tointeger(user.account_id)
+		local fd = math.tointeger(user.fd) or 0
+		local account_id = math.tointeger(user.account_id) or 0
 		log.printf ("agent fd=%d account_id=%d closed", fd, account_id)
 	end
 
@@ -169,7 +170,7 @@ function agent.kick ()
 		end
 
 		character_handler.save (user.character)
-		character_handler:unregister(user)
+		character_handler:unregister(user, ext_handlers)
 
 		user.account_id = nil
 		agent.CMD = nil
@@ -184,7 +185,7 @@ function agent.world_enter (world)
 	end
 
 	user.world = world
-	character_handler:unregister(user)
+	character_handler:unregister(user, ext_handlers)
 end
 
 function agent.world_leave (character_id)
@@ -203,9 +204,9 @@ function agent.map_enter (map)
 
 	user.map = map
 
-	map_handler:register (user)
-	aoi_handler:register (user)
-	combat_handler:register (user)
+	map_handler:register (user, ext_handlers)
+	aoi_handler:register (user, ext_handlers)
+	combat_handler:register (user, ext_handlers)
 end
 
 function agent.map_leave (character_id)
@@ -213,14 +214,15 @@ function agent.map_leave (character_id)
 		log ("agent character: %d(%s) map leave",
 			user.character.id, user.character.general.name)
 		user.map = nil
-		map_handler:unregister (user)
-		aoi_handler:unregister (user)
-		combat_handler:unregister (user)
+		map_handler:unregister (user, ext_handlers)
+		aoi_handler:unregister (user, ext_handlers)
+		combat_handler:unregister (user, ext_handlers)
 	end
 end
 
 service.init {
 	command = agent,
+	ext_handlers = ext_handlers,
 	-- info = data,
 	require = {
 		"manager",

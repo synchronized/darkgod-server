@@ -34,47 +34,55 @@ do
 	end
 end
 
-local event = {
-	authed = false
+local cli = {
+	authed = false,
+	pingtime = os.time()
 }
 
-function event:ping()
+local common_handler = {
+}
+
+function common_handler:ping()
 end
 
-function event:res_acknowledgment (args)
+
+local login_handler = {
+}
+
+function login_handler:on_acknowledgment (args)
 	user.acknumber = crypt.base64decode(args.acknumber)
 	user.clientkey = crypt.randomkey()
-	message.sendmsg ("req_handshake", {
+	message.sendmsg ("login.handshake", {
 		client_pub = crypt.base64encode(crypt.dhexchange(user.clientkey)),
 	})
 end
 
 local cb_handshake = function(req, opflag, error_code)
 	if not opflag then
-		print(string.format("<error> RESPONSE.handshake errcode:%d(%s)", error_code, errcode.error_msg(error_code)))
+		print(string.format("<error> RESPONSE login.handshake_ret errcode:%d(%s)", error_code, errcode.error_msg(error_code)))
 		return
 	end
-	message.sendmsg("req_auth", {
+	message.sendmsg("login.auth", {
 		username = crypt.base64encode(crypt.desencode(user.secret, user.username)),
 		password = crypt.base64encode(crypt.desencode(user.secret, user.password)),
 	})
 end
 
-function event:res_handshake(resp)
+function login_handler:on_handshake(resp)
 	if not resp then
-		print(string.format("<error> RESPONSE.handshake resp is nil:"))
+		print(string.format("<error> RESPONSE login.on_handshake resp is nil:"))
 		return
 	end
 	user.secret = crypt.dhsecret(crypt.base64decode(resp.secret), user.clientkey)
 	print("sceret is ", crypt.hexencode(user.secret))
 
 	local hmac = crypt.base64encode(crypt.hmac64(user.acknumber, user.secret))
-	message.sendmsg("req_challenge", { hmac = hmac }, cb_handshake)
+	message.sendmsg("login.challenge", { hmac = hmac }, cb_handshake)
 end
 
-function event:res_auth(resp)
+function login_handler:on_auth(resp)
 	if not resp then
-		print(string.format("<error> RESPONSE.auth resp is nil:"))
+		print(string.format("<error> RESPONSE login.on_auth resp is nil:"))
 		return
 	end
 
@@ -83,56 +91,61 @@ function event:res_auth(resp)
 	user.token = crypt.base64decode(resp.token)
 
 	-- 跳转到游戏服务器
-	--message.sendmsg ("req_switchgame", nil)
+	--message.sendmsg ("login.switchgame", nil)
 
-	self.authed = true
+	cli.authed = true
 
 	-- 请求角色列表
-	message.sendmsg ("req_character_list", nil)
+	message.sendmsg ("character.list", nil)
 end
 
-function event:res_character_list (resp)
-	print(string.format("<== RESPONSE res_character_list resp: %s",
+local character_handler = {}
+
+function character_handler:on_list (resp)
+	print(string.format("<== RESPONSE character.on_list resp: %s",
 						cjsonutil.serialise_value(resp)))
 	resp = resp or {}
 	local character = resp.character or {}
 
 	local character_id = next(character)
-	print(string.format("choose characterId: %s", tostring(character_id)))
 	if not character_id then
-		message.sendmsg("req_character_create", {
+		local charname = string.format("%s-%s", user.username, "hello")
+		print(string.format("create charname: %s", charname))
+		message.sendmsg("character.create", {
 			character = {
-				name = string.format("%s-%s", user.username, "hello"),
+				name = charname,
 				race = gddata.enums['common.ERaceType'].HUMAN,
 				profession = gddata.enums['common.EProfessionType'].WARRIOR,
 			},
-		})
+		}, function (req, result, error_code)
+			if error_code ~= errcode.SUCCESS then
+				print(string.format("create character failed error_code:%d, req:%s", 
+					error_code, cjsonutil.serialise_value(req)))
+			end
+		end)
 	else
-		message.sendmsg("req_character_pick", {
+		print(string.format("choose characterId: %s", tostring(character_id)))
+		message.sendmsg("character.pick", {
 			id = character_id,
 		})
 	end
 end
 
-function event:res_character_create ()
-	message.sendmsg ("req_character_list")
+function character_handler:on_create ()
+	message.sendmsg ("character.list")
 end
 
-function event:res_character_pick (resp)
-	print(string.format("<== RESPONSE res_character_pick character: %s",
+function character_handler:on_pick (resp)
+	print(string.format("<== RESPONSE character.on_pick character: %s",
 						cjsonutil.serialise_value(resp)))
 end
 
-local cli = {
-	authed = false,
-	pingtime = os.time()
-}
 function cli:update()
 	if self.authed then
 		local timenow = os.time()
 		if timenow - self.pingtime > 5 then
 			self.pingtime = timenow
-			message.sendmsg("ping")
+			message.sendmsg("common.ping")
 		end
 	end
 end
@@ -140,7 +153,9 @@ end
 message.register()
 message.peer(IP, 9777)
 message.connect()
-message.bind(cli, event)
+message.bind('common', common_handler)
+message.bind('login', login_handler)
+message.bind('character', character_handler)
 
 while true do
 	message.update(5)

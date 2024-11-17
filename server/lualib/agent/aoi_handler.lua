@@ -8,7 +8,7 @@ local handler = require "agent.handler"
 
 local RESPONSE = {}
 local CMD = {}
-handler = handler.new (nil, RESPONSE, CMD)
+handler = handler.new ('aoi', nil, RESPONSE, CMD)
 
 local subscribe_character
 local subscribe_agent
