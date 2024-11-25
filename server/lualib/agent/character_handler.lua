@@ -11,6 +11,9 @@ local client = require "client"
 
 local handler = require "agent.handler"
 
+local configEnums = require "gddata.gamedata.Schema.schema".enums
+local ECurrencyType = configEnums['item.ECurrencyType']
+
 local REQUEST = {}
 handler = handler.new ('character', REQUEST)
 
@@ -76,9 +79,10 @@ local function create (name, race, profession)
 			profession = profession,
 			map = map_id,
 		},
+		currency = {
+		},
 		attribute = {
 			level = math.tointeger(1),
-			exp = 0,
 		},
 		movement = {
 			mode = 0,
@@ -90,6 +94,12 @@ local function create (name, race, profession)
 			 },
 		},
 	}
+
+	-- 初始化货币
+	for _, v in pairs(ECurrencyType) do
+		character.currency[v] = 0
+	end
+
 	return nil, character
 end
 
