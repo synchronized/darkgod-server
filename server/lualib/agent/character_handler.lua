@@ -67,7 +67,8 @@ local function create (name, race, profession)
 		return errcode.CHARACTER_INVLID_CHARACTER_PROFESSION
 	end
 
-	local map_id = gdd.globalconfig.mainCityMapId
+	local confGlobal = gdd.globalconfig
+	local map_id = confGlobal.mainCityMapId
 	local conf_city = gdd.map[map_id]
 	local born_position = conf_city.playerBornPosition
 	local born_rotate = conf_city.playerBornRotate
@@ -81,8 +82,11 @@ local function create (name, race, profession)
 		},
 		currency = {
 		},
+		task = {
+			guide_id = confGlobal.beginGuideId,
+		},
 		attribute = {
-			level = math.tointeger(1),
+			level = math.tointeger(confGlobal.beginLevel),
 		},
 		movement = {
 			mode = 0,
