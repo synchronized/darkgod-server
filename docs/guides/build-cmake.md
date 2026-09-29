@@ -34,9 +34,9 @@ cmake --build cmake-build-mingw --parallel 4
 构建结果直接输出到业务配置使用的目录：
 
 ```text
-build/cmake-build-mingw/bin/modules/common/luaclib/cjson.so
-build/cmake-build-mingw/bin/modules/common/luaclib/pb.so
-build/cmake-build-mingw/bin/modules/server/luaclib/uuid/core.so
+build/cmake-build-mingw/project/modules/common/luaclib/cjson.so
+build/cmake-build-mingw/project/modules/common/luaclib/pb.so
+build/cmake-build-mingw/project/modules/server/luaclib/uuid/core.so
 ```
 
 Windows 当前暂时关闭 lsocket，因为仓库中的旧版 Windows 兼容代码与现代 Windows SDK 的
@@ -57,16 +57,16 @@ skyuv 的子构建目录固定在 `3rd/skyuv/build/darkgod`，这是 v0.1.1 补�
 构建结果：
 
 ```text
-build/windows-vs2022-debug/bin/skyuv.exe
-build/windows-vs2022-debug/bin/modules/common/luaclib/cjson.dll
-build/windows-vs2022-debug/bin/modules/common/luaclib/pb.dll
-build/windows-vs2022-debug/bin/modules/server/luaclib/uuid/core.dll
-build/windows-vs2022-debug/bin/modules/server/cservice/package.dll
-build/windows-vs2022-debug/lib/*.lib
+build/windows-vs2022-debug/project/bin/skyuv.exe
+build/windows-vs2022-debug/project/modules/common/luaclib/cjson.dll
+build/windows-vs2022-debug/project/modules/common/luaclib/pb.dll
+build/windows-vs2022-debug/project/modules/server/luaclib/uuid/core.dll
+build/windows-vs2022-debug/project/modules/server/cservice/package.dll
+build/windows-vs2022-debug/project/lib/*.lib
 ```
 
-其中 `bin` 放运行时和 Lua/C 服务模块，`lib` 放导入库及其他链接产物；
-preset 目录本身负责区分 Debug 和 Release，目录布局与 Granit 的 CMake 输出约定一致。
+其中 `project/bin` 放运行时，`project/modules` 放 Lua/C 服务模块，`project/lib` 放导入库及其他链接产物，
+`project/config` 放启动时生成的配置；preset 目录本身负责区分 Debug 和 Release。
 
 查看可用 preset：
 

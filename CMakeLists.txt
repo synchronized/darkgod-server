@@ -22,11 +22,11 @@ set(DARKGOD_SKYNET_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/3rd/skynet" CACHE PATH
 set(DARKGOD_LUA_ROOT "${DARKGOD_SKYNET_ROOT}/3rd/lua" CACHE PATH
     "Lua source directory")
 
-set(DARKGOD_OUTPUT_BIN_DIR "${CMAKE_BINARY_DIR}/bin" CACHE PATH
+set(DARKGOD_OUTPUT_BIN_DIR "${CMAKE_BINARY_DIR}/project/bin" CACHE PATH
     "Runtime executable and module output root")
-set(DARKGOD_OUTPUT_LIB_DIR "${CMAKE_BINARY_DIR}/lib" CACHE PATH
+set(DARKGOD_OUTPUT_LIB_DIR "${CMAKE_BINARY_DIR}/project/lib" CACHE PATH
     "Static and import library output root")
-set(DARKGOD_OUTPUT_MODULE_DIR "${DARKGOD_OUTPUT_BIN_DIR}/modules" CACHE PATH
+set(DARKGOD_OUTPUT_MODULE_DIR "${CMAKE_BINARY_DIR}/project/modules" CACHE PATH
     "Lua C module and C service output root")
 set(DARKGOD_COMMON_LUACLIB_DIR "${DARKGOD_OUTPUT_MODULE_DIR}/common/luaclib" CACHE PATH
     "Output directory for common Lua C modules")

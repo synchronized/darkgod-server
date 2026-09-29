@@ -5,9 +5,9 @@ common_root = "common"
 skyuv_root = "3rd/skyuv"
 skyuv_build_root = skyuv_root.."/build/darkgod"
 skyuv_runtime_root = skyuv_build_root.."/3rd/portable"
-darkgod_build_root = "build/windows-vs2022-debug"
+darkgod_build_root = "build/windows-vs2022-debug/project"
 darkgod_build_configuration = "Debug"
-darkgod_module_root = darkgod_build_root.."/bin/modules"
+darkgod_module_root = darkgod_build_root.."/modules"
 pb_root = "3rd/pb"
 
 thread = 8
