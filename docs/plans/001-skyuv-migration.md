@@ -6,7 +6,7 @@
 - 日期：2026-09-28
 - 前置计划：[000：迁移到 CMake 构建](000-cmake-migration.md)
 - 目标：在保留现有 Lua 业务逻辑的前提下，让项目使用 skyuv 运行时构建和启动
-- 当前阶段：skyuv v0.1.0 已完成 CMake 子项目接入和 Windows 模块构建，等待 Redis 后继续完整回归
+- 当前阶段：skyuv v0.1.1 已完成 CMake 子项目接入和 Windows 模块构建，等待 Redis 后继续完整回归
 
 ## 背景与目标
 
@@ -36,7 +36,7 @@
 3. `package`、`uuid`、`cjson`、`pb` 和 `lsocket` 必须针对 skyuv 重新编译。
 4. 迁移期间保留原 Skynet 启动路径，允许通过配置或脚本切换运行时。
 5. 详细命令输出、平台矩阵和性能结果写入 `docs/records/`，不持续膨胀本计划。
-6. skyuv 固定使用发布版本 `v0.1.0`，通过 CMake 子项目目标接入，不再手动拼接 skyuv `.lib` 路径。
+6. skyuv 固定使用发布版本 `v0.1.1`，通过 CMake 子项目目标接入，不再手动拼接 skyuv `.lib` 路径。
 
 ## 实施顺序
 
@@ -45,8 +45,8 @@
 - 确认 [000：迁移到 CMake 构建](000-cmake-migration.md) 已达到出口条件。
 - 确认项目自有 C 模块不再依赖 Skynet `platform.mk`。
 - 确认使用独立构建目录可以生成全部项目模块。
-- 确认 `3rd/skyuv` 已固定到 `v0.1.0`，并通过 `skyuv::lua`、`skyuv::platform` 和
-  `skyuv_skynet_portable` 目标完成链接。
+- 确认 `3rd/skyuv` 已固定到 `v0.1.1`，并通过 `skyuv::lua`、`skyuv::platform` 和
+  `skyuv` 目标完成链接。
 
 出口：项目构建系统已经可以独立切换 Skynet 运行时来源；Windows skyuv 模式不再依赖
 预先生成的外部 `.lib` 路径。
@@ -66,9 +66,9 @@
 - 使用 skyuv 官方 preset 构建最小运行时、Lua 服务和 TCP echo。
 - 确认 `cservice`、`lualib`、`luaclib`、`service` 的输出位置。
 - 确认项目当前编译器和 skyuv CMake 工具链兼容。
-- 使用 skyuv `v0.1.0` 发布的 CMake targets 供 darkgod 模块链接。
+- 使用 skyuv `v0.1.1` 发布的 CMake targets 供 darkgod 模块链接。
 
-出口：skyuv 最小节点和 echo 示例通过，构建结果可从干净目录启动。skyuv `v0.1.0`
+出口：skyuv 最小节点和 echo 示例通过，构建结果可从干净目录启动。skyuv `v0.1.1`
 作为 darkgod CMake 子项目的 Windows 配置和模块构建已验证；skyuv 独立运行时验证见
 [Windows 构建记录](../records/skyuv-windows-build.md)。
 

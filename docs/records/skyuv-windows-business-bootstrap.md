@@ -8,11 +8,11 @@
 
 使用 skyuv 已构建的 Windows Debug 运行时，并通过项目 CMake 的 `DARKGOD_USE_SKYUV` 模式生成：
 
-+ `build/windows-vs2022-debug/bin/modules/common/luaclib/cjson.dll`
-+ `build/windows-vs2022-debug/bin/modules/common/luaclib/pb.dll`
-+ `build/windows-vs2022-debug/bin/modules/server/luaclib/uuid/core.dll`
-+ `build/windows-vs2022-debug/bin/modules/server/cservice/package.dll`
-+ `build/windows-vs2022-debug/bin/skyuv_skynet_portable.exe`
+- `build/windows-vs2022-debug/bin/modules/common/luaclib/cjson.dll`
+- `build/windows-vs2022-debug/bin/modules/common/luaclib/pb.dll`
+- `build/windows-vs2022-debug/bin/modules/server/luaclib/uuid/core.dll`
+- `build/windows-vs2022-debug/bin/modules/server/cservice/package.dll`
+- `build/windows-vs2022-debug/bin/skyuv.exe`
 
 构建命令和参数见 [CMake 构建指南](../guides/build-cmake.md)。
 

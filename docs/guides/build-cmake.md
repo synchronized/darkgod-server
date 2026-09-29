@@ -49,15 +49,15 @@ cmake --preset windows-vs2022-debug
 cmake --build --preset windows-vs2022-debug --parallel 4
 ```
 
-该模式参考 skyuv 的 `CMakePresets.json`，将 `3rd/skyuv` v0.1.0 作为 CMake 子项目构建，并通过
-`skyuv::lua`、`skyuv::platform` 和 `skyuv_skynet_portable` 目标完成链接。
-skyuv 的子构建目录固定在 `3rd/skyuv/build/darkgod`，这是 v0.1.0 补丁流程要求的
+该模式参考 skyuv 的 `CMakePresets.json`，将 `3rd/skyuv` v0.1.1 作为 CMake 子项目构建，并通过
+`skyuv::lua`、`skyuv::platform` 和 `skyuv` 目标完成链接。
+skyuv 的子构建目录固定在 `3rd/skyuv/build/darkgod`，这是 v0.1.1 补丁流程要求的
 源码树内构建路径；该目录属于构建产物，不应提交。
 
 构建结果：
 
 ```text
-build/windows-vs2022-debug/bin/skyuv_skynet_portable.exe
+build/windows-vs2022-debug/bin/skyuv.exe
 build/windows-vs2022-debug/bin/modules/common/luaclib/cjson.dll
 build/windows-vs2022-debug/bin/modules/common/luaclib/pb.dll
 build/windows-vs2022-debug/bin/modules/server/luaclib/uuid/core.dll
@@ -95,7 +95,7 @@ cmake -S . -B cmake-build-mingw -DDARKGOD_BUILD_LSOCKET=ON
 
 `package` 依赖 Skynet 或 skyuv 运行时导出的 `skynet_*` 符号，默认不加入构建。
 启用 `DARKGOD_USE_SKYUV` 时会自动链接同一次 CMake 配置生成的
-`skyuv_skynet_portable` 目标；原版 Skynet 仍可通过 `DARKGOD_SKYNET_RUNTIME_LIBRARY`
+`skyuv` 目标；原版 Skynet 仍可通过 `DARKGOD_SKYNET_RUNTIME_LIBRARY`
 显式指定运行时库：
 
 ```powershell

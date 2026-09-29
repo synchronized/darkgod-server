@@ -52,7 +52,7 @@ if(DARKGOD_USE_SKYUV)
         message(FATAL_ERROR "DARKGOD_USE_SKYUV requires initialized skyuv submodules")
     endif()
     set(SKYUV_BUILD_TESTS OFF CACHE BOOL "不构建 skyuv 测试" FORCE)
-    # skyuv v0.1.0 的 Skynet 补丁流程要求二进制目录位于 skyuv 源码树内。
+    # skyuv v0.1.1 的 Skynet 补丁流程要求二进制目录位于 skyuv 源码树内。
     # 该目录由 .gitignore 排除，不会污染 skyuv 子模块的源码提交。
     set(DARKGOD_SKYUV_BINARY_DIR "${DARKGOD_SKYUV_ROOT}/build/darkgod" CACHE PATH
         "Embedded skyuv binary directory")
@@ -62,11 +62,11 @@ if(DARKGOD_USE_SKYUV)
         "Lua source directory" FORCE)
     set(DARKGOD_SKYUV_LUA_TARGET skyuv::lua)
     set(DARKGOD_SKYUV_PLATFORM_TARGET skyuv::platform)
-    set(DARKGOD_SKYUV_RUNTIME_TARGET skyuv_skynet_portable)
+    set(DARKGOD_SKYUV_RUNTIME_TARGET skyuv)
     set(DARKGOD_SKYUV_PATCHED_SKYNET_INCLUDE_DIR
         "${DARKGOD_SKYUV_BINARY_DIR}/3rd/skynet-patched/skynet-src")
-    if(TARGET skyuv_skynet_portable)
-        set_target_properties(skyuv_skynet_portable PROPERTIES
+    if(TARGET skyuv)
+        set_target_properties(skyuv PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY "${DARKGOD_OUTPUT_BIN_PATH}"
             LIBRARY_OUTPUT_DIRECTORY "${DARKGOD_OUTPUT_BIN_PATH}"
             ARCHIVE_OUTPUT_DIRECTORY "${DARKGOD_OUTPUT_LIB_PATH}"

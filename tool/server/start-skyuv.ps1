@@ -9,7 +9,7 @@ $ErrorActionPreference = "Stop"
 $projectDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $presetName = if ($Preset) { $Preset } else { "windows-vs2022-$($Configuration.ToLower())" }
 $buildRoot = Join-Path $projectDir "build\$presetName"
-$runtime = Join-Path $buildRoot "bin\skyuv_skynet_portable.exe"
+$runtime = Join-Path $buildRoot "bin\skyuv.exe"
 
 if (-not (Test-Path -LiteralPath $runtime)) {
     throw "skyuv runtime not found: $runtime. Build with: cmake --preset $presetName; cmake --build --preset $presetName"
