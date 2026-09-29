@@ -1,5 +1,2 @@
 #!/bin/bash
-
-kill `cat *.pid`
-rm *.pid
-
+exec "$(cd "$(dirname "$0")"; pwd)/server/stop.sh" "$@"

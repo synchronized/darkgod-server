@@ -19,6 +19,7 @@
 *.so
 *.so.*
 *.dylib
+*.pdb
 
 # Executables
 *.exe
@@ -35,3 +36,8 @@ bin/
 var/
 client/anonymous
 proto/protobuf/pb/*.pb
+
+# CMake build trees
+build/
+cmake-build-*/
+CMakeUserPresets.json

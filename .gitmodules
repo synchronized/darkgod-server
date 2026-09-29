@@ -14,3 +14,6 @@
 [submodule "3rd/pb"]
 	path = 3rd/pb
 	url = https://github.com/starwing/lua-protobuf.git
+[submodule "3rd/skyuv"]
+	path = 3rd/skyuv
+	url = https://github.com/synchronized/skyuv.git

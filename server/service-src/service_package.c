@@ -200,13 +200,13 @@ new_message(struct package *P, const uint8_t *msg, int sz) {
 	for (;;) {
 		if (P->uncomplete_sz >= 0) {
 			if (sz >= P->uncomplete_sz) {
-				memcpy(P->uncomplete.msg + P->uncomplete.sz - P->uncomplete_sz, msg, P->uncomplete_sz);
+				memcpy((uint8_t *)P->uncomplete.msg + P->uncomplete.sz - P->uncomplete_sz, msg, P->uncomplete_sz);
 				msg += P->uncomplete_sz;
 				sz -= P->uncomplete_sz;
 				queue_push(&P->response, &P->uncomplete);
 				P->uncomplete_sz = -1;
 			} else {
-				memcpy(P->uncomplete.msg + P->uncomplete.sz - P->uncomplete_sz, msg, sz);
+				memcpy((uint8_t *)P->uncomplete.msg + P->uncomplete.sz - P->uncomplete_sz, msg, sz);
 				P->uncomplete_sz -= sz;
 				return;
 			}

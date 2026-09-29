@@ -17,10 +17,10 @@ cp 3rd/redis/src/redis-{cli,server} bin/
 ### 编译proto文件
 protoc --proto_path=proto/protobuf/source --descriptor_set_out=proto/protobuf/pb/protocol.pb proto/protobuf/source/*.proto
 ### 初始化redis数据库
-tool/setup/setup
-var/redis-start
+tool/setup/setup.sh
+tool/redis/start.sh
 ### 开始f服务器
-tool/server-pb-start.sh
+tool/server/start.sh
 
 # 前言
 
@@ -47,11 +47,11 @@ tool/server-pb-start.sh
 
 ## 安装
 1. 先安装redis
-2. 执行 tool/setup/setup 脚本，它会在项目根目录下创建一个var目录，创建好数据库需要的文件和管理脚本。
+2. 执行 `tool/setup/setup.sh`，它会在项目根目录下创建 `var` 目录和 Redis 配置。
 
 ## 运行
-1. 运行 var/redis-start 脚本，启动好对应的数据库实例。
-2. 运行 server/run 脚本，启动服务器程序。
+1. 运行 `tool/redis/start.sh`，启动对应的数据库实例。
+2. 运行 `tool/server/start.sh`，启动服务器程序。
 
 # 客户端
 
