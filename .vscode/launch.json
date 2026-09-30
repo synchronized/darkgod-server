@@ -8,8 +8,8 @@
             "name": "(gdb) 启动",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/3rd/skynet/skynet",
-            "args": [ "${workspaceFolder}/server/config-pb" ],
+            "program": "${workspaceFolder}/build/linux-gcc-debug/project/bin/skyuv",
+            "args": [ "${workspaceFolder}/build/linux-gcc-debug/project/config/config-skyuv-pb.lua" ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [

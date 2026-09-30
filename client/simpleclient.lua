@@ -7,13 +7,13 @@ PASSWORD = PASSWORD or "123456"
 package.path = table.concat({
 		PATH.."/client/lualib/?.lua",
 		PATH.."/common/lualib/?.lua",
-		PATH.."/3rd/skynet/lualib/?.lua",
+		PATH.."/3rd/skyuv/3rd/skynet/lualib/?.lua",
 }, ";")
 package.cpath = table.concat({
 		PATH.."/client/luaclib/?.so",
 		PATH.."/common/luaclib/?.so",
 		PATH.."/server/luaclib/?.so",
-		PATH.."/3rd/skynet/luaclib/?.so",
+		PATH.."/3rd/skyuv/3rd/skynet/luaclib/?.so",
 }, ";")
 
 local crypt = require "client.crypt"

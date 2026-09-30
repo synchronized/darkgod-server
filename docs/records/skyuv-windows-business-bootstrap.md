@@ -6,7 +6,7 @@
 
 ## 构建结果
 
-使用 skyuv 已构建的 Windows Debug 运行时，并通过项目 CMake 的 `DARKGOD_USE_SKYUV` 模式生成：
+使用 skyuv 已构建的 Windows Debug 运行时，并通过项目 CMake 的 skyuv-only 配置生成：
 
 - `build/windows-vs2022-debug/project/modules/common/luaclib/cjson.dll`
 - `build/windows-vs2022-debug/project/modules/common/luaclib/pb.dll`

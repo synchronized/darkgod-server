@@ -6,11 +6,11 @@
 - 日期：2026-09-28
 - 前置计划：[000：迁移到 CMake 构建](000-cmake-migration.md)
 - 目标：在保留现有 Lua 业务逻辑的前提下，让项目使用 skyuv 运行时构建和启动
-- 当前阶段：skyuv v0.1.1 已完成 CMake 子项目接入和 Windows 模块构建，等待 Redis 后继续完整回归
+- 当前阶段：skyuv 已成为唯一运行时，正在移除父项目的原版 Skynet 子模块和兼容入口
 
 ## 背景与目标
 
-项目当前通过 `3rd/skynet`、Makefile 和 shell 启动脚本构建运行。skyuv 保留 Skynet 的 Actor、
+项目原先通过 `3rd/skynet`、Makefile 和 shell 启动脚本构建运行。skyuv 保留 Skynet 的 Actor、
 消息队列、服务调度和上层 Lua API，同时以 libuv 替换底层网络及平台能力，适合作为跨平台运行时。
 
 本计划的目标是：
@@ -27,14 +27,14 @@
 - 不在本阶段替换 Redis、协议格式或数据库结构。
 - 不将 skyuv 改造成独立于 Skynet 的新框架。
 - 不在没有测试数据的情况下承诺性能优于原版 Skynet。
-- 不直接删除原 `3rd/skynet`；它在 Linux 上继续作为行为对照基线，Windows 不再依赖其可执行文件。
+- 删除父项目的原版 Skynet 子模块；skyuv 自身维护的 `3rd/skyuv/3rd/skynet` 仍作为运行时依赖保留。
 
 ## 已确认决策
 
 1. 采用 skyuv 的 CMake 构建和运行时，不继续把原 Makefile 作为唯一入口。
 2. Lua 服务先按兼容模式迁移，只有测试发现差异时才修改业务代码。
 3. `package`、`uuid`、`cjson`、`pb` 和 `lsocket` 必须针对 skyuv 重新编译。
-4. 迁移期间保留原 Skynet 启动路径，允许通过配置或脚本切换运行时。
+4. 迁移完成后只保留 skyuv 启动路径，不再维护两个运行时入口。
 5. 详细命令输出、平台矩阵和性能结果写入 `docs/records/`，不持续膨胀本计划。
 6. skyuv 固定使用发布版本 `v0.1.1`，通过 CMake 子项目目标接入，不再手动拼接 skyuv `.lib` 路径。
 
@@ -48,12 +48,11 @@
 - 确认 `3rd/skyuv` 已固定到 `v0.1.1`，并通过 `skyuv::lua`、`skyuv::platform` 和
   `skyuv` 目标完成链接。
 
-出口：项目构建系统已经可以独立切换 Skynet 运行时来源；Windows skyuv 模式不再依赖
-预先生成的外部 `.lib` 路径。
+出口：项目构建系统固定使用 skyuv，不再依赖父项目的 Skynet 源码或预先生成的外部 `.lib` 路径。
 
 ### 阶段 1：建立基线
 
-- Linux：记录当前 Skynet 提交、编译器、Lua 版本和启动方式。
+- Linux：记录 skyuv 提交、编译器、Lua 版本和启动方式。
 - Linux：完成当前项目的登录、角色、地图和客户端回归。
 - Windows：记录当前编译器、skyuv 提交和目标运行时目录；不把原版 Skynet 构建作为前置条件。
 - 保存启动日志、端口、Redis 配置和已知失败行为。
@@ -130,7 +129,7 @@
 
 - 新环境可以按文档完成构建和启动。
 - 运行时、配置、Lua 文件和 C 模块目录边界清晰。
-- Linux 原版 Skynet 启动路径仍可作为回退和行为对照方案；Windows 运行入口使用 skyuv。
+- 所有平台统一使用 skyuv 运行入口；skyuv 内部的 Skynet 子模块由递归 submodule 初始化。
 - 迁移结果、平台限制和性能数据已写入 `docs/records/`。
 
 ## 风险与未决问题
@@ -138,7 +137,7 @@
 | 风险/问题 | 影响 | 处理方式 |
 |---|---|---|
 | skyuv CMake 子项目的补丁流程要求源码树内构建目录 | 外部二进制目录配置会失败 | darkgod 固定使用 `3rd/skyuv/build/darkgod`，并在构建指南中说明 |
-| 当前 Makefile 依赖 Skynet `platform.mk` | 不能直接沿用旧构建 | 新增 CMake 入口，迁移完成后再决定 Makefile 去留 |
+| 旧 Makefile 依赖 Skynet `platform.mk` | 不能继续沿用旧构建 | 迁移完成后移除 Makefile，统一使用 CMake |
 | socket 事件顺序或关闭语义差异 | 登录和连接清理可能异常 | 用阶段 0 基线和协议测试对照 |
 | Windows 旧 `int fd` 接口限制 | 外部 socket 接管不可直接迁移 | 第一阶段只验收普通监听和连接 |
 | OpenSSL 和 Redis 外部依赖 | 构建或启动失败 | 在构建前固定版本、路径和健康检查 |

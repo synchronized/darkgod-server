@@ -15,12 +15,8 @@ else()
     option(DARKGOD_BUILD_LSOCKET "Build the client lsocket Lua module" ON)
 endif()
 option(DARKGOD_BUILD_PACKAGE "Build the custom package Skynet service" OFF)
-option(DARKGOD_USE_SKYUV "Build project modules for the skyuv runtime" OFF)
-
-set(DARKGOD_SKYNET_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/3rd/skynet" CACHE PATH
-    "Skynet source directory")
-set(DARKGOD_LUA_ROOT "${DARKGOD_SKYNET_ROOT}/3rd/lua" CACHE PATH
-    "Lua source directory")
+set(DARKGOD_SKYUV_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/3rd/skyuv" CACHE PATH
+    "skyuv source directory")
 
 set(DARKGOD_OUTPUT_BIN_DIR "${CMAKE_BINARY_DIR}/project/bin" CACHE PATH
     "Runtime executable and module output root")
@@ -42,62 +38,38 @@ set(DARKGOD_SERVER_CSERVICE_DIR "${DARKGOD_OUTPUT_MODULE_DIR}/server/cservice" C
 # suppress that automatic suffix.
 set(DARKGOD_OUTPUT_BIN_PATH "$<1:${DARKGOD_OUTPUT_BIN_DIR}>")
 set(DARKGOD_OUTPUT_LIB_PATH "$<1:${DARKGOD_OUTPUT_LIB_DIR}>")
-set(DARKGOD_SKYNET_RUNTIME_LIBRARY "" CACHE FILEPATH
-    "Optional Skynet runtime library used to resolve C service symbols")
-set(DARKGOD_SKYUV_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/3rd/skyuv" CACHE PATH
-    "skyuv source directory")
+if(NOT EXISTS "${DARKGOD_SKYUV_ROOT}/3rd/skynet/3rd/lua/lua.h")
+    message(FATAL_ERROR "skyuv submodules are not initialized; run git submodule update --init --recursive")
+endif()
 
-if(DARKGOD_USE_SKYUV)
-    if(NOT EXISTS "${DARKGOD_SKYUV_ROOT}/3rd/skynet/3rd/lua/lua.h")
-        message(FATAL_ERROR "DARKGOD_USE_SKYUV requires initialized skyuv submodules")
-    endif()
-    set(SKYUV_BUILD_TESTS OFF CACHE BOOL "不构建 skyuv 测试" FORCE)
-    # skyuv v0.1.1 的 Skynet 补丁流程要求二进制目录位于 skyuv 源码树内。
-    # 该目录由 .gitignore 排除，不会污染 skyuv 子模块的源码提交。
-    set(DARKGOD_SKYUV_BINARY_DIR "${DARKGOD_SKYUV_ROOT}/build/darkgod" CACHE PATH
-        "Embedded skyuv binary directory")
-    add_subdirectory("${DARKGOD_SKYUV_ROOT}" "${DARKGOD_SKYUV_BINARY_DIR}")
+set(SKYUV_BUILD_TESTS OFF CACHE BOOL "不构建 skyuv 测试" FORCE)
+# skyuv v0.1.1 的 Skynet 补丁流程要求二进制目录位于 skyuv 源码树内。
+# 该目录由 .gitignore 排除，不会污染 skyuv 子模块的源码提交。
+set(DARKGOD_SKYUV_BINARY_DIR "${DARKGOD_SKYUV_ROOT}/build/darkgod" CACHE PATH
+    "Embedded skyuv binary directory")
+add_subdirectory("${DARKGOD_SKYUV_ROOT}" "${DARKGOD_SKYUV_BINARY_DIR}")
 
-    set(DARKGOD_LUA_ROOT "${DARKGOD_SKYUV_ROOT}/3rd/skynet/3rd/lua" CACHE PATH
-        "Lua source directory" FORCE)
-    set(DARKGOD_SKYUV_LUA_TARGET skyuv::lua)
-    set(DARKGOD_SKYUV_PLATFORM_TARGET skyuv::platform)
-    set(DARKGOD_SKYUV_RUNTIME_TARGET skyuv)
-    set(DARKGOD_SKYUV_PATCHED_SKYNET_INCLUDE_DIR
-        "${DARKGOD_SKYUV_BINARY_DIR}/3rd/skynet-patched/skynet-src")
-    if(TARGET skyuv)
-        set_target_properties(skyuv PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY "${DARKGOD_OUTPUT_BIN_PATH}"
-            LIBRARY_OUTPUT_DIRECTORY "${DARKGOD_OUTPUT_BIN_PATH}"
-            ARCHIVE_OUTPUT_DIRECTORY "${DARKGOD_OUTPUT_LIB_PATH}"
-        )
-    endif()
-    if(MSVC)
-        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-    endif()
+set(DARKGOD_LUA_ROOT "${DARKGOD_SKYUV_ROOT}/3rd/skynet/3rd/lua" CACHE PATH
+    "Lua source directory" FORCE)
+set(DARKGOD_LUA_TARGET skyuv::lua)
+set(DARKGOD_SKYUV_PLATFORM_TARGET skyuv::platform)
+set(DARKGOD_SKYUV_RUNTIME_TARGET skyuv)
+set(DARKGOD_SKYUV_PATCHED_SKYNET_INCLUDE_DIR
+    "${DARKGOD_SKYUV_BINARY_DIR}/3rd/skynet-patched/skynet-src")
+if(TARGET skyuv)
+    set_target_properties(skyuv PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${DARKGOD_OUTPUT_BIN_PATH}"
+        LIBRARY_OUTPUT_DIRECTORY "${DARKGOD_OUTPUT_BIN_PATH}"
+        ARCHIVE_OUTPUT_DIRECTORY "${DARKGOD_OUTPUT_LIB_PATH}"
+    )
+endif()
+if(MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+if(WIN32)
     set(DARKGOD_MODULE_SUFFIX ".dll")
 else()
     set(DARKGOD_MODULE_SUFFIX ".so")
-endif()
-
-if(DARKGOD_USE_SKYUV)
-    set(DARKGOD_LUA_TARGET "${DARKGOD_SKYUV_LUA_TARGET}")
-else()
-    set(DARKGOD_LUA_TARGET darkgod_lua)
-endif()
-
-if(NOT DARKGOD_USE_SKYUV)
-    file(GLOB DARKGOD_LUA_SOURCES CONFIGURE_DEPENDS
-        "${DARKGOD_LUA_ROOT}/*.c")
-    list(REMOVE_ITEM DARKGOD_LUA_SOURCES
-        "${DARKGOD_LUA_ROOT}/lua.c"
-        "${DARKGOD_LUA_ROOT}/luac.c"
-        "${DARKGOD_LUA_ROOT}/onelua.c")
-
-    add_library(darkgod_lua STATIC ${DARKGOD_LUA_SOURCES})
-    set_target_properties(darkgod_lua PROPERTIES POSITION_INDEPENDENT_CODE ON)
-    target_include_directories(darkgod_lua PUBLIC "${DARKGOD_LUA_ROOT}")
-    target_include_directories(darkgod_lua PRIVATE "${DARKGOD_SKYNET_ROOT}/skynet-src")
 endif()
 
 function(darkgod_configure_module target output_dir)
@@ -112,16 +84,10 @@ function(darkgod_configure_module target output_dir)
         set_target_properties(${target} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
     endif()
     target_include_directories(${target} PRIVATE "${DARKGOD_LUA_ROOT}")
-    if(DARKGOD_USE_SKYUV)
-        target_link_libraries(${target} PRIVATE
-            ${DARKGOD_LUA_TARGET}
-            ${DARKGOD_SKYUV_PLATFORM_TARGET}
-        )
-    elseif(WIN32)
-        target_link_libraries(${target} PRIVATE darkgod_lua ws2_32)
-    elseif(UNIX)
-        target_link_libraries(${target} PRIVATE m)
-    endif()
+    target_link_libraries(${target} PRIVATE
+        ${DARKGOD_LUA_TARGET}
+        ${DARKGOD_SKYUV_PLATFORM_TARGET}
+    )
 endfunction()
 
 if(DARKGOD_BUILD_CJSON)
@@ -146,17 +112,13 @@ endif()
 if(DARKGOD_BUILD_UUID)
     add_library(darkgod_uuid MODULE server/lualib-src/lua-uuid.c)
     darkgod_configure_module(darkgod_uuid "${DARKGOD_SERVER_LUACLIB_DIR}")
-    if(DARKGOD_USE_SKYUV)
-        # server/lualib/uuid.lua loads "uuid.core", so Lua searches uuid/core.dll
-        # and the module must export luaopen_uuid_core.
-        set_target_properties(darkgod_uuid PROPERTIES
-            OUTPUT_NAME core
-            LIBRARY_OUTPUT_DIRECTORY "$<1:${DARKGOD_SERVER_LUACLIB_DIR}/uuid>"
-            RUNTIME_OUTPUT_DIRECTORY "$<1:${DARKGOD_SERVER_LUACLIB_DIR}/uuid>"
-        )
-    else()
-        set_target_properties(darkgod_uuid PROPERTIES OUTPUT_NAME uuid)
-    endif()
+    # server/lualib/uuid.lua loads "uuid.core", so Lua searches uuid/core.dll
+    # and the module must export luaopen_uuid_core.
+    set_target_properties(darkgod_uuid PROPERTIES
+        OUTPUT_NAME core
+        LIBRARY_OUTPUT_DIRECTORY "$<1:${DARKGOD_SERVER_LUACLIB_DIR}/uuid>"
+        RUNTIME_OUTPUT_DIRECTORY "$<1:${DARKGOD_SERVER_LUACLIB_DIR}/uuid>"
+    )
 endif()
 
 if(DARKGOD_BUILD_LSOCKET)
@@ -182,22 +144,12 @@ endif()
 
 if(DARKGOD_BUILD_PACKAGE)
     add_library(darkgod_package MODULE EXCLUDE_FROM_ALL server/service-src/service_package.c)
-    if(DARKGOD_USE_SKYUV)
-        set(DARKGOD_SKYNET_INCLUDE_DIR
-            "${DARKGOD_SKYUV_PATCHED_SKYNET_INCLUDE_DIR}")
-    else()
-        set(DARKGOD_SKYNET_INCLUDE_DIR "${DARKGOD_SKYNET_ROOT}/skynet-src")
-    endif()
     target_include_directories(darkgod_package PRIVATE
-        "${DARKGOD_SKYNET_INCLUDE_DIR}"
+        "${DARKGOD_SKYUV_PATCHED_SKYNET_INCLUDE_DIR}"
         "${DARKGOD_LUA_ROOT}"
+        "${DARKGOD_SKYUV_ROOT}/include"
+        "${DARKGOD_SKYUV_ROOT}/src/compat/skynet"
     )
-    if(DARKGOD_USE_SKYUV)
-        target_include_directories(darkgod_package PRIVATE
-            "${DARKGOD_SKYUV_ROOT}/include"
-            "${DARKGOD_SKYUV_ROOT}/src/compat/skynet"
-        )
-    endif()
     set_target_properties(darkgod_package PROPERTIES
         PREFIX ""
         SUFFIX "${DARKGOD_MODULE_SUFFIX}"
@@ -206,18 +158,14 @@ if(DARKGOD_BUILD_PACKAGE)
         RUNTIME_OUTPUT_DIRECTORY "$<1:${DARKGOD_SERVER_CSERVICE_DIR}>"
         ARCHIVE_OUTPUT_DIRECTORY "${DARKGOD_OUTPUT_LIB_PATH}"
     )
-    if(DARKGOD_SKYNET_RUNTIME_LIBRARY)
-        target_link_libraries(darkgod_package PRIVATE "${DARKGOD_SKYNET_RUNTIME_LIBRARY}")
-    elseif(DARKGOD_USE_SKYUV)
-        target_link_libraries(darkgod_package PRIVATE
-            ${DARKGOD_SKYUV_RUNTIME_TARGET}
-        )
-    endif()
+    target_link_libraries(darkgod_package PRIVATE
+        ${DARKGOD_SKYUV_RUNTIME_TARGET}
+    )
 endif()
 
 add_custom_target(darkgod_build_summary ALL
     COMMAND ${CMAKE_COMMAND} -E echo "darkgod CMake build configured"
-    COMMAND ${CMAKE_COMMAND} -E echo "Skynet: ${DARKGOD_SKYNET_ROOT}"
+    COMMAND ${CMAKE_COMMAND} -E echo "skyuv: ${DARKGOD_SKYUV_ROOT}"
     COMMAND ${CMAKE_COMMAND} -E echo "Lua: ${DARKGOD_LUA_ROOT}"
     VERBATIM
 )

@@ -84,7 +84,7 @@ cmake/
 ### 阶段 3：迁移自定义 C 服务
 
 - 添加 `package` C 服务目标。
-- 接入 `3rd/skynet/skynet-src` 和 Lua 头文件。
+- 接入 skyuv 内部 Skynet 兼容头文件和 Lua 头文件。
 - 确认 `skynet_malloc`、`skynet_send`、`skynet_socket_*` 等符号由 Skynet/skyuv 运行时提供。
 - Linux 使用 Skynet 做基线验证，Windows 使用 skyuv 完成监听、收包、回包、关闭和超时流程验证。
 
@@ -102,7 +102,7 @@ cmake/
 ### 阶段 5：为 skyuv 接入做准备
 
 - 把 Skynet 运行时依赖抽象为可配置路径或 CMake target。
-- 避免项目代码直接假设 `3rd/skynet/platform.mk` 存在。
+- 避免项目代码直接假设 Skynet `platform.mk` 存在。
 - 确认自定义模块可以使用 skyuv 提供的兼容头文件和链接目标重新构建。
 - 将 skyuv 迁移计划的构建部分改为复用本计划的目标。
 

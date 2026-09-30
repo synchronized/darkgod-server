@@ -4,16 +4,9 @@ Forked from https://github.com/jintiao/some-mmorpg
 ## 运行
 ### 更新submodule
 git submodule update --init --recursive
-### 编译skynet
-cd 3rd/skynet 
-make linux
-cd -
-### 编译redis
-cd 3rd/redis
-make
-cd -
-mkdir -p bin
-cp 3rd/redis/src/redis-{cli,server} bin/
+### 构建 skyuv 和项目模块
+cmake --preset linux-gcc-debug
+cmake --build --preset linux-gcc-debug --target darkgod_package
 ### 编译proto文件
 protoc --proto_path=proto/protobuf/source --descriptor_set_out=proto/protobuf/pb/protocol.pb proto/protobuf/source/*.proto
 ### 初始化redis数据库
@@ -42,8 +35,8 @@ tool/server/start.sh
 对于64linux系统，可尝试用命令 "./Configure linux-x86_64 no-shared -fPIC; make"进行编译。   
 如果编译出错，请自行google解决。
 
-### 3rd/skynet
-[参考文档](https://github.com/cloudwu/skynet)。
+### 3rd/skyuv
+[参考文档](https://github.com/synchronized/skyuv)。
 
 ## 安装
 1. 先安装redis
@@ -51,7 +44,7 @@ tool/server/start.sh
 
 ## 运行
 1. 运行 `tool/redis/start.sh`，启动对应的数据库实例。
-2. 运行 `tool/server/start.sh`，启动服务器程序。
+2. 运行 `tool/server/start.sh`，启动 skyuv 服务器程序。
 
 # 客户端
 

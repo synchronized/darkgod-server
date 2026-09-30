@@ -72,7 +72,6 @@
       "hidden": true,
       "inherits": "generator-vs2022",
       "cacheVariables": {
-        "DARKGOD_USE_SKYUV": true,
         "DARKGOD_BUILD_LSOCKET": false,
         "DARKGOD_BUILD_PACKAGE": true,
         "SKYUV_USE_SHARED_LIBUV": false,
@@ -91,22 +90,22 @@
     },
     {
       "name": "linux-gcc-debug",
-      "displayName": "Linux GCC Debug",
+      "displayName": "Linux GCC skyuv Debug",
       "inherits": ["base-ninja", "platform-linux", "config-debug"]
     },
     {
       "name": "linux-gcc-release",
-      "displayName": "Linux GCC Release",
+      "displayName": "Linux GCC skyuv Release",
       "inherits": ["base-ninja", "platform-linux", "config-release"]
     },
     {
       "name": "macos-clang-debug",
-      "displayName": "macOS Clang Debug",
+      "displayName": "macOS Clang skyuv Debug",
       "inherits": ["base-ninja", "platform-macos", "config-debug"]
     },
     {
       "name": "macos-clang-release",
-      "displayName": "macOS Clang Release",
+      "displayName": "macOS Clang skyuv Release",
       "inherits": ["base-ninja", "platform-macos", "config-release"]
     }
   ],

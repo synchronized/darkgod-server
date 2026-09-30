@@ -2,8 +2,8 @@
 
 ## 当前状态
 
-项目当前使用 Skynet 兼容的 Lua 服务模型。Linux 现阶段可使用原版 Skynet 运行，Windows 则使用
-skyuv 提供的兼容运行时。运行时负责 Actor/Service 生命周期、服务间消息、定时器和网络事件分发；
+项目当前使用 Skynet 兼容的 Lua 服务模型，所有平台由 skyuv 提供兼容运行时。运行时负责
+Actor/Service 生命周期、服务间消息、定时器和网络事件分发；
 业务代码位于 `server/` 和 `common/`，协议和数据位于 `proto/`。
 
 ## 目录职责
@@ -16,7 +16,7 @@ server/lualib-src/    服务端 Lua C 模块
 common/lualib/        客户端和服务端共享 Lua 库、协议辅助代码
 client/               测试客户端
 proto/                sproto/protobuf 协议和生成数据
-3rd/skynet/           Linux 行为基线及 skyuv 兼容所需的上游源码
+3rd/skyuv/            skyuv 运行时及其内部 Skynet、libuv 子模块
 tool/                 构建、启动和 Redis 辅助脚本
 ```
 
@@ -41,8 +41,7 @@ server/service/main.lua
 
 ## 构建边界
 
-当前 [Makefile](../../Makefile) 依赖 Skynet 的 `platform.mk`，并生成 `cjson`、`pb`、`uuid`、
-`lsocket` 和 `package` 等模块。迁移到 skyuv 后，运行时由 skyuv 的 CMake 工程生成；项目自己的
+当前 CMake 工程生成 skyuv 运行时以及 `cjson`、`pb`、`uuid`、`lsocket` 和 `package` 等模块；项目自己的
 C 模块必须针对 skyuv 兼容层重新编译，不能直接复用旧二进制。
 
 ## skyuv 的位置

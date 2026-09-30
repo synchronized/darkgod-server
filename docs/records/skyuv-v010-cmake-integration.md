@@ -13,7 +13,7 @@
 ```powershell
 cmake -S . -B cmake-build-skyuv-v010 `
   -G "Visual Studio 17 2022" -A x64 `
-  -DDARKGOD_USE_SKYUV=ON `
+  -DDARKGOD_BUILD_PACKAGE=ON `
   -DDARKGOD_BUILD_LSOCKET=OFF `
   -DDARKGOD_BUILD_PACKAGE=ON `
   -DSKYUV_USE_SHARED_LIBUV=OFF `

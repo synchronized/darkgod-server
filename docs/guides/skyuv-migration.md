@@ -52,7 +52,7 @@ Windows 当前可以使用 [start-skyuv.ps1](../../tool/server/start-skyuv.ps1) 
 
 ## 常见问题
 
-### 可以直接把 `3rd/skynet/skynet` 换成 skyuv 吗？
+### 可以直接把原版 Skynet 可执行文件换成 skyuv 吗？
 
 不建议。skyuv 使用自己的 CMake 构建和运行时目录，项目配置及自定义模块也需要跟随调整。
 

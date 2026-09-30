@@ -2,17 +2,15 @@
 
 ## 适用场景
 
-本指南说明如何使用 CMake 构建当前项目自有 Lua C 模块。当前 Windows 构建已验证使用 CMake、
-Clang 和 MinGW Makefiles。Windows 运行时不依赖原版 Skynet，而应由 skyuv 提供；Linux 可以继续
-使用原版 Skynet 做行为基线。
+本指南说明如何使用 CMake 构建 skyuv 运行时和当前项目自有 Lua C 模块。所有平台均由 skyuv
+提供运行时，不再依赖父项目的原版 Skynet 子模块。
 
 ## 前置条件
 
 - CMake 3.23 或更高版本。
 - 支持 C11 的编译器。
-- 已初始化 `3rd/skynet`、`3rd/lua-cjson`、`3rd/lsocket` 和 `3rd/pb` 子模块。
-- Linux：原版 Skynet 或 skyuv 运行时。
-- Windows：skyuv 运行时。
+- 已递归初始化 `3rd/skyuv`、`3rd/lua-cjson`、`3rd/lsocket` 和 `3rd/pb` 子模块。
+- 所有平台：skyuv 运行时及其内部 Skynet 子模块。
 
 初始化子模块：
 
@@ -93,20 +91,16 @@ cmake -S . -B cmake-build-mingw -DDARKGOD_BUILD_LSOCKET=ON
 
 ### 构建 package 服务
 
-`package` 依赖 Skynet 或 skyuv 运行时导出的 `skynet_*` 符号，默认不加入构建。
-启用 `DARKGOD_USE_SKYUV` 时会自动链接同一次 CMake 配置生成的
-`skyuv` 目标；原版 Skynet 仍可通过 `DARKGOD_SKYNET_RUNTIME_LIBRARY`
-显式指定运行时库：
+`package` 依赖 skyuv 运行时导出的 `skynet_*` 符号，默认不加入构建；启用目标后会自动链接同一次
+CMake 配置生成的 `skyuv` 目标：
 
 ```powershell
-cmake -S . -B cmake-build-mingw `
-  -DDARKGOD_BUILD_PACKAGE=ON `
-  -DDARKGOD_SKYNET_RUNTIME_LIBRARY="path/to/runtime.lib"
+cmake -S . -B cmake-build-mingw -DDARKGOD_BUILD_PACKAGE=ON
 cmake --build cmake-build-mingw --target darkgod_package
 ```
 
 ## 当前限制
 
 - CMake 当前负责项目自有 Lua C 模块、自定义 C 服务目标以及 skyuv 子项目的构建。
-- 原版 Skynet 主程序、gate、snlua 等运行时服务不作为 Windows 构建目标。
-- Windows skyuv 模式使用 `.dll` 模块后缀；Linux 原版 Skynet 模式仍使用 `.so`。
+- skyuv 主程序、gate、snlua 等运行时服务由 skyuv 子项目构建。
+- 当前 skyuv 集成使用 `.dll` 模块后缀；Linux/macOS 的平台后缀适配待单独验证。
