@@ -1,48 +1,40 @@
-#!/bin/bash
+#!/bin/sh
 
-echo "redis.setup"
+set -eu
 
 CURRDIR=$(cd "$(dirname "$0")";pwd)
 TEMPLATE="${CURRDIR}/redis.conf"
 
-if [[ $# -gt 0 ]]
-then
-	TARGET=$1
-else
-	TARGET="$(dirname "$(dirname "${CURRDIR}")")/var"
-fi
+PROJECTDIR=$(dirname "$(dirname "${CURRDIR}")")
+TARGET=${1:-${PROJECTDIR}/var/redis}
+INSTANCE_COUNT=${2:-2}
+BASEPORT=${3:-${REDIS_BASE_PORT:-6379}}
 
-if [[ $# -gt 1 ]]
-then
-	REDIS_NUM=$2
-else
-	REDIS_NUM=8
-fi
+case "$INSTANCE_COUNT" in
+	''|*[!0-9]*) echo "instance count must be a non-negative integer" >&2; exit 2 ;;
+esac
 
-if [ ! -d "${TARGET}" ]
-then
-	mkdir $TARGET
-fi
+mkdir -p "${TARGET}"
 
-BASEPORT=6379
-
-for i in `seq 0 ${REDIS_NUM}`
-do
-	NAME="redis${i}"
+index=0
+while [ "$index" -lt "$INSTANCE_COUNT" ]; do
+	NAME="redis${index}"
 	DIR="${TARGET}/${NAME}"
-	if [ ! -d "${DIR}" ]
-	then
-		mkdir $DIR
-	fi
+	mkdir -p "${DIR}"
 
-	PORT=$(($i + $BASEPORT))
+	PORT=$((index + BASEPORT))
 	PIDFILE="${NAME}.pid"
 	LOGFILE="${NAME}.log"
 	DBFILE="${NAME}.rdb"
 
-	cat ${TEMPLATE} |
-		sed "s@logfile \"\"@logfile ${LOGFILE}@g" |
-		sed "s@port 6379@port ${PORT}@g" |
-		sed "s@pidfile /var/run/redis.pid@pidfile ${PIDFILE}@g" |
-		sed "s@dbfilename dump.rdb@dbfilename ${DBFILE}@g" > ${DIR}/${NAME}.conf
+	sed \
+		-e "s@^daemonize .*@daemonize no@" \
+		-e "s@^logfile .*@logfile \"\"@" \
+		-e "s@^port .*@port ${PORT}@" \
+		-e "s@^pidfile .*@pidfile ${PIDFILE}@" \
+		-e "s@^dbfilename .*@dbfilename ${DBFILE}@" \
+		-e "s@^dir .*@dir .@" \
+		"${TEMPLATE}" > "${DIR}/${NAME}.conf"
+
+	index=$((index + 1))
 done

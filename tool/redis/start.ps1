@@ -9,7 +9,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $projectDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$dataRoot = Join-Path $projectDir "var\windows-redis"
+$dataRoot = Join-Path $projectDir "var\redis"
 
 function Resolve-RedisServer {
     if ($RedisServerPath) {
@@ -48,8 +48,14 @@ switch ($Action) {
                 Write-Host "Redis already running on 127.0.0.1:$port"
                 continue
             }
+            $directory = Get-RedisDirectory $index
+            $logPath = Join-Path $directory ("redis{0}.log" -f $index)
+            $errorLogPath = Join-Path $directory ("redis{0}.error.log" -f $index)
+            $pidPath = Join-Path $directory ".launcher.pid"
             $process = Start-Process -FilePath $server -ArgumentList @(Split-Path -Leaf $configPath) `
-                -WorkingDirectory (Get-RedisDirectory $index) -WindowStyle Hidden -PassThru
+                -WorkingDirectory $directory -RedirectStandardOutput $logPath `
+                -RedirectStandardError $errorLogPath -WindowStyle Hidden -PassThru
+            Set-Content -LiteralPath $pidPath -Value $process.Id -NoNewline
             $ready = $false
             for ($attempt = 0; $attempt -lt 20; $attempt++) {
                 Start-Sleep -Milliseconds 250
@@ -57,7 +63,6 @@ switch ($Action) {
                 if ($process.HasExited) { break }
             }
             if (-not $ready) {
-                $logPath = Join-Path (Get-RedisDirectory $index) ("redis{0}.log" -f $index)
                 throw "Redis failed to start on port $port. See $logPath"
             }
             Write-Host "Redis started on 127.0.0.1:$port (PID $($process.Id))"
@@ -65,23 +70,15 @@ switch ($Action) {
     }
     "Stop" {
         for ($index = 0; $index -lt $InstanceCount; $index++) {
-            $pidPath = Join-Path (Get-RedisDirectory $index) ("redis{0}.pid" -f $index)
+            $pidPath = Join-Path (Get-RedisDirectory $index) ".launcher.pid"
             if (-not (Test-Path -LiteralPath $pidPath)) { continue }
             $processId = [int](Get-Content -LiteralPath $pidPath -Raw).Trim()
             $process = Get-Process -Id $processId -ErrorAction SilentlyContinue
-            if (-not $process) {
-                # MSYS2 Redis may write its POSIX PID instead of the native Windows PID.
-                $connection = Get-NetTCPConnection -LocalPort (Get-RedisPort $index) -State Listen `
-                    -ErrorAction SilentlyContinue | Select-Object -First 1
-                if ($connection) {
-                    $processId = $connection.OwningProcess
-                    $process = Get-Process -Id $processId -ErrorAction SilentlyContinue
-                }
-            }
             if ($process -and $process.ProcessName -eq "redis-server") {
                 Stop-Process -Id $processId
                 Write-Host "Redis stopped on 127.0.0.1:$(Get-RedisPort $index) (PID $processId)"
             }
+            Remove-Item -LiteralPath $pidPath -Force -ErrorAction SilentlyContinue
         }
     }
     "Status" {

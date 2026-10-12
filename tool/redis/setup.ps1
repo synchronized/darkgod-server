@@ -7,7 +7,7 @@ $ErrorActionPreference = "Stop"
 
 $projectDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $templatePath = Join-Path $PSScriptRoot "redis.conf"
-$dataRoot = Join-Path $projectDir "var\windows-redis"
+$dataRoot = Join-Path $projectDir "var\redis"
 $template = Get-Content -LiteralPath $templatePath -Raw
 
 for ($index = 0; $index -lt $InstanceCount; $index++) {

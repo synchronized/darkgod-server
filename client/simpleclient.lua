@@ -1,4 +1,4 @@
-local PATH, IP, USERNAME, PASSWORD = ...
+local PATH, IP, USERNAME, PASSWORD, SKYUV_LUACLIB = ...
 
 IP = IP or "127.0.0.1"
 USERNAME = USERNAME or "sunday1"
@@ -9,11 +9,13 @@ package.path = table.concat({
 		PATH.."/common/lualib/?.lua",
 		PATH.."/3rd/skyuv/3rd/skynet/lualib/?.lua",
 }, ";")
+local module_suffix = package.config:sub(1, 1) == "\\" and ".dll" or ".so"
 package.cpath = table.concat({
-		PATH.."/client/luaclib/?.so",
-		PATH.."/common/luaclib/?.so",
-		PATH.."/server/luaclib/?.so",
-		PATH.."/3rd/skyuv/3rd/skynet/luaclib/?.so",
+		PATH.."/client/luaclib/?"..module_suffix,
+		PATH.."/common/luaclib/?"..module_suffix,
+		PATH.."/server/luaclib/?"..module_suffix,
+		PATH.."/3rd/skyuv/3rd/skynet/luaclib/?"..module_suffix,
+		SKYUV_LUACLIB and (SKYUV_LUACLIB.."/?"..module_suffix) or "",
 }, ";")
 
 local crypt = require "client.crypt"

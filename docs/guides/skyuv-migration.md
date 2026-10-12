@@ -21,7 +21,7 @@ skyuv 项目地址：[synchronized/skyuv](https://github.com/synchronized/skyuv)
 
 需要重新确认：
 
-- `tool/server/start.sh`、`tool/server/start-skyuv.ps1` 的运行时入口。
+- `tool/server/start.sh`、`tool/server/start.ps1` 的运行时入口，以及对应的 `status`/`stop` 生命周期脚本。
 - `server/config`、`server/config-pb` 中的路径。
 - `server/service-src/service_package.c`。
 - `server/lualib-src/lua-uuid.c`、cjson、pb 和 skyuv `client.socket` 的编译产物。
@@ -38,7 +38,7 @@ skyuv 项目地址：[synchronized/skyuv](https://github.com/synchronized/skyuv)
 7. 依次验证登录、角色、地图、移动、战斗、AOI 和正常退出。
 8. 在目标平台执行长时间运行和连接压力测试后，再替换生产入口。
 
-Windows 当前可以使用 [start-skyuv.ps1](../../tool/server/start-skyuv.ps1) 启动入口；该入口
+Windows 当前可以使用 [start.ps1](../../tool/server/start.ps1) 启动入口；该入口
 使用 [config-skyuv-pb.lua](../../server/config-skyuv-pb.lua)，不依赖原版 Skynet 可执行文件。
 
 ## 验证重点

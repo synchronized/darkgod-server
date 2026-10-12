@@ -9,11 +9,16 @@ cmake --preset linux-gcc-debug
 cmake --build --preset linux-gcc-debug --target darkgod_package
 ### 编译proto文件
 protoc --proto_path=proto/protobuf/source --descriptor_set_out=proto/protobuf/pb/protocol.pb proto/protobuf/source/*.proto
-### 初始化redis数据库
-tool/setup/setup.sh
+### 启动服务
 tool/redis/start.sh
-### 开始f服务器
 tool/server/start.sh
+
+# 后台启动
+DARKGOD_BACKGROUND=1 tool/server/start.sh
+
+# 查看/停止后台服务
+tool/server/status.sh
+tool/server/stop.sh
 
 # 前言
 
@@ -40,7 +45,7 @@ tool/server/start.sh
 
 ## 安装
 1. 先安装redis
-2. 执行 `tool/setup/setup.sh`，它会在项目根目录下创建 `var` 目录和 Redis 配置。
+2. 执行 `tool/redis/setup.sh`，它会在项目根目录下创建 `var/redis` 目录和 Redis 配置；启动脚本也会自动执行这一步。
 
 ## 运行
 1. 运行 `tool/redis/start.sh`，启动对应的数据库实例。

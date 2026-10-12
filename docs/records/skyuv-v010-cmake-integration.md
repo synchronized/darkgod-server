@@ -39,7 +39,7 @@ darkgod 通过 `add_subdirectory` 接入 skyuv，并链接 `skyuv::lua`、
 
 ## 业务启动验证
 
-使用 `tool/server/start-windows.ps1` 启动两个 Redis 实例后，skyuv 业务节点已成功加载：
+使用 `tool/server/start-all.ps1` 启动两个 Redis 实例后，skyuv 业务节点已成功加载：
 
 - `database`、`loginserver`、`loginwork`；
 - `socket_proxyd`、`manager`、`sharedatad`；

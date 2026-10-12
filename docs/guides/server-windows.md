@@ -3,7 +3,7 @@
 ## 运行前提
 
 - 已初始化 Git 子模块：`git submodule update --init --recursive`。
-- 已按 [CMake 构建指南](build-cmake.md) 构建 skyuv v0.1.1 和项目模块。
+- 已按 [CMake 构建指南](build-cmake.md) 构建 skyuv v0.2.0-beta.1 和项目模块。
 - 已安装 Windows 版本的 `redis-server.exe`，并将其加入 `PATH`，或者启动时通过
   `-RedisServerPath` 指定完整路径。
 
@@ -14,7 +14,7 @@
 | redis0 | `127.0.0.1:6379` | center |
 | redis1 | `127.0.0.1:6380` | group 1 |
 
-Redis 数据、配置和日志会生成到 `var/windows-redis/`，该目录不应提交。
+Redis 数据、配置和日志会生成到 `var/redis/`，该目录不应提交。
 
 ## 构建
 
@@ -28,13 +28,13 @@ cmake --build --preset windows-vs2022-debug --parallel 4
 如果 `redis-server.exe` 已在 `PATH`：
 
 ```powershell
-.\tool\server\start-windows.ps1
+.\tool\server\start-all.ps1
 ```
 
 如果 Redis 不在 `PATH`：
 
 ```powershell
-.\tool\server\start-windows.ps1 `
+.\tool\server\start-all.ps1 `
   -RedisServerPath "C:\tools\Redis\redis-server.exe"
 ```
 
@@ -58,7 +58,7 @@ cmake --build --preset windows-vs2022-debug --parallel 4
 .\tool\redis\stop.ps1
 ```
 
-`Stop` 只根据 `var/windows-redis/redis*.pid` 停止由本项目配置创建、且进程名为
+`Stop` 只根据 `var/redis/redis*/.launcher.pid` 停止由本项目脚本启动、且进程名为
 `redis-server` 的实例，不会按端口强制终止其他 Redis 进程。
 
 ## 直接启动 skyuv
@@ -66,13 +66,23 @@ cmake --build --preset windows-vs2022-debug --parallel 4
 如果 Redis 已经由其他方式启动，可以跳过 Redis 脚本：
 
 ```powershell
-.\tool\server\start-skyuv.ps1
+.\tool\server\start.ps1
 ```
 
 默认运行 Debug 构建，也可以指定配置目录：
 
 ```powershell
-.\tool\server\start-skyuv.ps1 -Configuration Release
+.\tool\server\start.ps1 -Configuration Release
+
+# 后台启动
+.\tool\server\start.ps1 -Background
+
+# 查看/停止后台服务
+.\tool\server\status.ps1
+.\tool\server\stop.ps1
+
+# 停止 server 和 Redis
+.\tool\server\stop-all.ps1
 ```
 
 ## 故障排查
@@ -90,4 +100,4 @@ Connect failed connection refused 127.0.0.1 6379
 ```
 
 确认 `6379` 和 `6380` 均为 `running` 后，再重新启动服务器。Redis 日志位于
-`var/windows-redis/redis0/redis0.log` 和 `var/windows-redis/redis1/redis1.log`。
+`var/redis/redis0/redis0.log` 和 `var/redis/redis1/redis1.log`。

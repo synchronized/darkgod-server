@@ -21,7 +21,7 @@
 启动入口：
 
 ```powershell
-.\tool\server\start-skyuv.ps1
+.\tool\server\start.ps1
 ```
 
 使用配置：[server/config-skyuv-pb.lua](../../server/config-skyuv-pb.lua)。
@@ -35,7 +35,7 @@
 
 ## Redis 与业务启动
 
-通过 `tool/server/start-windows.ps1` 自动启动 Redis 后，业务服务已完整进入运行状态：
+通过 `tool/server/start-all.ps1` 自动启动 Redis 后，业务服务已完整进入运行状态：
 
 - `snlua bootstrap`、`database`、`loginserver`、`world`、`map` 和 `hub` 均成功启动。
 - Hub 成功监听 `0.0.0.0:9777`。

@@ -3,9 +3,8 @@
 本项目是一个基于 Skynet 的 Lua 游戏服务器，包含登录、角色、地图移动、战斗和 AOI 等示例功能。
 当前文档重点是评估并实施向 `skyuv` 运行时的迁移。
 
-启动脚本按职责和平台统一放在 `tool/setup/`、`tool/server/`、`tool/redis/` 和
-`tool/client/`；Linux 使用 `.sh`，Windows 使用 `.ps1`。旧的根目录脚本保留为兼容入口，
-新文档优先使用新目录。
+启动脚本按职责和平台统一放在 `tool/server/`、`tool/redis/` 和 `tool/client/`；Linux 使用
+`.sh`，Windows 使用 `.ps1`。服务生命周期统一由 `start`、`status`、`stop` 管理。
 
 ## 推荐阅读顺序
 
