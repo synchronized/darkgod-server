@@ -9,11 +9,6 @@ set(CMAKE_C_EXTENSIONS ON)
 option(DARKGOD_BUILD_CJSON "Build the cjson Lua module" ON)
 option(DARKGOD_BUILD_PB "Build the protobuf Lua module" ON)
 option(DARKGOD_BUILD_UUID "Build the uuid Lua module" ON)
-if(WIN32)
-    option(DARKGOD_BUILD_LSOCKET "Build the client lsocket Lua module" OFF)
-else()
-    option(DARKGOD_BUILD_LSOCKET "Build the client lsocket Lua module" ON)
-endif()
 option(DARKGOD_BUILD_PACKAGE "Build the custom package Skynet service" OFF)
 set(DARKGOD_SKYUV_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/3rd/skyuv" CACHE PATH
     "skyuv source directory")
@@ -28,8 +23,6 @@ set(DARKGOD_COMMON_LUACLIB_DIR "${DARKGOD_OUTPUT_MODULE_DIR}/common/luaclib" CAC
     "Output directory for common Lua C modules")
 set(DARKGOD_SERVER_LUACLIB_DIR "${DARKGOD_OUTPUT_MODULE_DIR}/server/luaclib" CACHE PATH
     "Output directory for server Lua C modules")
-set(DARKGOD_CLIENT_LUACLIB_DIR "${DARKGOD_OUTPUT_MODULE_DIR}/client/luaclib" CACHE PATH
-    "Output directory for client Lua C modules")
 set(DARKGOD_SERVER_CSERVICE_DIR "${DARKGOD_OUTPUT_MODULE_DIR}/server/cservice" CACHE PATH
     "Output directory for Skynet C services")
 # Visual Studio is a multi-configuration generator and normally appends
@@ -119,27 +112,6 @@ if(DARKGOD_BUILD_UUID)
         LIBRARY_OUTPUT_DIRECTORY "$<1:${DARKGOD_SERVER_LUACLIB_DIR}/uuid>"
         RUNTIME_OUTPUT_DIRECTORY "$<1:${DARKGOD_SERVER_LUACLIB_DIR}/uuid>"
     )
-endif()
-
-if(DARKGOD_BUILD_LSOCKET)
-    set(DARKGOD_LSOCKET_SOURCES 3rd/lsocket/lsocket.c)
-    if(WIN32)
-        list(APPEND DARKGOD_LSOCKET_SOURCES 3rd/lsocket/win_compat.c)
-    endif()
-    add_library(darkgod_lsocket MODULE ${DARKGOD_LSOCKET_SOURCES})
-    target_include_directories(darkgod_lsocket PRIVATE 3rd/lsocket)
-    if(WIN32)
-        # The vendored lsocket checks _WINDOWS and has its own inet_ntop
-        # compatibility symbol, which conflicts with the modern Windows SDK.
-        target_compile_definitions(darkgod_lsocket PRIVATE
-            _WINDOWS=1
-            inet_ntop=darkgod_inet_ntop
-        )
-    endif()
-    darkgod_configure_module(darkgod_lsocket "${DARKGOD_CLIENT_LUACLIB_DIR}")
-    set_target_properties(darkgod_lsocket PROPERTIES OUTPUT_NAME lsocket)
-elseif(WIN32)
-    message(STATUS "lsocket is disabled on Windows until its legacy SDK compatibility is updated")
 endif()
 
 if(DARKGOD_BUILD_PACKAGE)

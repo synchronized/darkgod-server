@@ -41,7 +41,8 @@ server/service/main.lua
 
 ## 构建边界
 
-当前 CMake 工程生成 skyuv 运行时以及 `cjson`、`pb`、`uuid`、`lsocket` 和 `package` 等模块；项目自己的
+当前 CMake 工程生成 skyuv 运行时以及 `cjson`、`pb`、`uuid` 和 `package` 等模块；客户端网络使用 skyuv 提供的
+`client.socket` 模块；项目自己的
 C 模块必须针对 skyuv 兼容层重新编译，不能直接复用旧二进制。
 
 ## skyuv 的位置

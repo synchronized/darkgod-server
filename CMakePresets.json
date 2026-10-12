@@ -72,7 +72,6 @@
       "hidden": true,
       "inherits": "generator-vs2022",
       "cacheVariables": {
-        "DARKGOD_BUILD_LSOCKET": false,
         "DARKGOD_BUILD_PACKAGE": true,
         "SKYUV_USE_SHARED_LIBUV": false,
         "SKYUV_BUILD_TESTS": false

@@ -24,7 +24,7 @@ skyuv 项目地址：[synchronized/skyuv](https://github.com/synchronized/skyuv)
 - `tool/server/start.sh`、`tool/server/start-skyuv.ps1` 的运行时入口。
 - `server/config`、`server/config-pb` 中的路径。
 - `server/service-src/service_package.c`。
-- `server/lualib-src/lua-uuid.c`、cjson、pb 和 lsocket 的编译产物。
+- `server/lualib-src/lua-uuid.c`、cjson、pb 和 skyuv `client.socket` 的编译产物。
 - Windows 动态库后缀、路径和外部 socket fd 语义。
 
 ## 推荐迁移步骤
@@ -33,7 +33,7 @@ skyuv 项目地址：[synchronized/skyuv](https://github.com/synchronized/skyuv)
 2. 使用 skyuv 官方 CMake preset 构建最小运行时和 TCP echo 示例。
 3. 复制 skyuv 示例配置，替换 `start`、`lua_path`、`lua_cpath`、`cpath` 和 `luaservice`。
 4. 先启动不加载自定义 C 服务的业务 Lua 节点。
-5. 重新构建 cjson、pb、uuid 和客户端 lsocket 模块。
+5. 重新构建 cjson、pb、uuid 和 skyuv 客户端 socket 模块。
 6. 将 `package` C 服务接入 skyuv 的 CMake 构建并重新编译。
 7. 依次验证登录、角色、地图、移动、战斗、AOI 和正常退出。
 8. 在目标平台执行长时间运行和连接压力测试后，再替换生产入口。

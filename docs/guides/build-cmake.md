@@ -9,7 +9,7 @@
 
 - CMake 3.23 或更高版本。
 - 支持 C11 的编译器。
-- 已递归初始化 `3rd/skyuv`、`3rd/lua-cjson`、`3rd/lsocket` 和 `3rd/pb` 子模块。
+- 已递归初始化 `3rd/skyuv`、`3rd/lua-cjson` 和 `3rd/pb` 子模块。
 - 所有平台：skyuv 运行时及其内部 Skynet 子模块。
 
 初始化子模块：
@@ -24,7 +24,6 @@ git submodule update --init --recursive
 
 ```powershell
 cmake -S . -B cmake-build-mingw -G "MinGW Makefiles" `
-  -DDARKGOD_BUILD_LSOCKET=OFF `
   -DDARKGOD_BUILD_PACKAGE=OFF
 cmake --build cmake-build-mingw --parallel 4
 ```
@@ -37,9 +36,6 @@ build/cmake-build-mingw/project/modules/common/luaclib/pb.so
 build/cmake-build-mingw/project/modules/server/luaclib/uuid/core.so
 ```
 
-Windows 当前暂时关闭 lsocket，因为仓库中的旧版 Windows 兼容代码与现代 Windows SDK 的
-`inet_ntop` 声明冲突。该模块属于后续跨平台适配任务。
-
 使用 skyuv 构建项目模块：
 
 ```powershell
@@ -47,9 +43,9 @@ cmake --preset windows-vs2022-debug
 cmake --build --preset windows-vs2022-debug --parallel 4
 ```
 
-该模式参考 skyuv 的 `CMakePresets.json`，将 `3rd/skyuv` v0.1.1 作为 CMake 子项目构建，并通过
+该模式参考 skyuv 的 `CMakePresets.json`，将 `3rd/skyuv` v0.2.0-beta.1 作为 CMake 子项目构建，并通过
 `skyuv::lua`、`skyuv::platform` 和 `skyuv` 目标完成链接。
-skyuv 的子构建目录固定在 `3rd/skyuv/build/darkgod`，这是 v0.1.1 补丁流程要求的
+skyuv 的子构建目录固定在 `3rd/skyuv/build/darkgod`，这是 skyuv 补丁流程要求的
 源码树内构建路径；该目录属于构建产物，不应提交。
 
 构建结果：
@@ -73,21 +69,6 @@ cmake --list-presets
 ```
 
 ## 可选目标
-
-### 构建 lsocket
-
-Linux/macOS 默认启用：
-
-```shell
-cmake -S . -B cmake-build
-cmake --build cmake-build --parallel
-```
-
-Windows 上只有在完成 lsocket 兼容代码更新后才启用：
-
-```powershell
-cmake -S . -B cmake-build-mingw -DDARKGOD_BUILD_LSOCKET=ON
-```
 
 ### 构建 package 服务
 
