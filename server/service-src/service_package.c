@@ -366,7 +366,15 @@ package_release(struct package *P) {
 
 int
 package_init(struct package * P, struct skynet_context *ctx, const char * param) {
-	int n = sscanf(param ? param : "", "%u %d", &P->manager, &P->fd);
+	const char *args = param ? param : "";
+	unsigned int manager = 0;
+	int n;
+	if (args[0] == ':') {
+		n = sscanf(args, ":%x %d", &manager, &P->fd);
+	} else {
+		n = sscanf(args, "%u %d", &manager, &P->fd);
+	}
+	P->manager = manager;
 	if (n != 2 || P->manager == 0 || P->fd == 0) {
 		skynet_error(ctx, "Invalid param [%s]", param);
 		return 1;
