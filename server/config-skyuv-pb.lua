@@ -8,7 +8,7 @@ skyuv_runtime_root = skyuv_build_root.."/3rd/portable"
 darkgod_build_root = "build/windows-vs2022-debug/project"
 darkgod_build_configuration = "Debug"
 darkgod_module_root = darkgod_build_root.."/modules"
-darkgod_module_suffix = package.config:sub(1, 1) == "\\" and ".dll" or ".so"
+darkgod_module_suffix = ".dll"
 pb_root = "3rd/pb"
 
 thread = 8
