@@ -219,9 +219,9 @@ Windows：
   -SkyuvLuaCpath "D:\path\to\skyuv\build\darkgod\3rd\portable\luaclib"
 ```
 
-客户端加载 skyuv 提供的 `client.socket`。当前 skyuv 尚未单独输出
-`client.crypt`，虽然其源码已存在并被合并进 `skynet` 模块；需要向 skyuv
-提出独立 `client.crypt` target 的需求后，客户端才能完整使用这套 CMake 构建流程。
+客户端加载 skyuv 统一输出的 `client.dll`，同时提供 `client.socket` 和
+`client.crypt` 两个 Lua 模块入口。正常构建 preset 会生成该模块；如果只构建
+客户端模块，请使用上面的 `skyuv_portable_lua_module_client` target。
 
 ## 推荐测试顺序
 
