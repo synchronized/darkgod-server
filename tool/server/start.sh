@@ -28,6 +28,15 @@ if [ -z "${DARKGOD_CONFIG:-}" ]; then
         server/config-skyuv-pb.lua > "$CONFIG"
 fi
 
+if [ ! -f "$PROJECTDIR/$CONFIG" ]; then
+    echo "server config not found: $CONFIG" >&2
+    exit 1
+fi
+
+echo "Preset:  $PRESET"
+echo "Runtime: $RUNTIME"
+echo "Config:  $CONFIG"
+
 if [ "${DARKGOD_BACKGROUND:-0}" = "1" ]; then
 	mkdir -p "$PID_DIR"
 	if [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null \

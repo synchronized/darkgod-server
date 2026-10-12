@@ -27,6 +27,18 @@ if (-not (Test-Path -LiteralPath $LuaPath)) {
     throw "Lua interpreter not found. Build it with: cmake --build --preset $presetName --target skyuv_lua_interpreter"
 }
 
+if (-not (Test-Path -LiteralPath $SkyuvLuaCpath)) {
+    throw "skyuv Lua module directory not found: $SkyuvLuaCpath"
+}
+if (-not (Test-Path -LiteralPath $moduleRoot)) {
+    throw "project Lua module directory not found: $moduleRoot. Build the project with preset $presetName"
+}
+
+Write-Host "Preset:       $presetName"
+Write-Host "Lua:          $LuaPath"
+Write-Host "skyuv modules: $SkyuvLuaCpath"
+Write-Host "project modules: $moduleRoot"
+
 & $LuaPath (Join-Path $projectDir "client\simpleclient.lua") `
     $projectDir $Ip $Username $Password $SkyuvLuaCpath $moduleRoot
 exit $LASTEXITCODE

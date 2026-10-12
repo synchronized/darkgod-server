@@ -149,6 +149,28 @@ PowerShell 使用脚本参数：
 
 ## Server
 
+### 直接运行指定构建产物
+
+推荐先确认 preset，再直接运行该 preset 目录下的 `skyuv` 和配置文件。这样可以明确
+知道使用的是哪一份编译产物：
+
+Windows：
+
+```powershell
+.\build\windows-vs2022-debug\project\bin\skyuv.exe `
+  .\build\windows-vs2022-debug\project\config\config-skyuv-pb.lua
+```
+
+Linux/macOS：
+
+```sh
+./build/linux-gcc-debug/project/bin/skyuv \
+  ./build/linux-gcc-debug/project/config/config-skyuv-pb.lua
+```
+
+配置文件由下面的快捷脚本按 preset 生成；如果切换 preset，请先用对应 preset
+启动一次脚本，或复制生成的配置文件后再直接运行。
+
 ### 前台启动
 
 前台启动适合开发调试，日志直接输出到当前终端。
@@ -163,6 +185,13 @@ Windows：
 
 ```powershell
 .\tool\server\start.ps1
+```
+
+脚本启动时会打印实际使用的 preset、`skyuv.exe` 和配置文件，并在路径不存在时直接失败。
+可以显式指定其他构建产物：
+
+```powershell
+.\tool\server\start.ps1 -Preset windows-clang-debug -Configuration Debug
 ```
 
 server 启动前需要确保 Redis 的 `6379` 和 `6380` 已经可用。
@@ -219,6 +248,9 @@ Windows：
 .\tool\client\start.ps1 `
   -Ip 127.0.0.1 -Username sunday1 -Password 123456
 ```
+
+客户端脚本也会打印实际使用的 Lua 解释器、skyuv 模块目录和项目模块目录；如果这些目录
+不存在会直接失败，避免静默加载旧产物。
 
 如果 Lua 解释器不在 skyuv 子模块默认路径：
 

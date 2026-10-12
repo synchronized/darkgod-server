@@ -47,6 +47,14 @@ if ($Config -eq "server/config-skyuv-pb.lua") {
     $runtimeConfig = "build/$presetName/project/config/config-skyuv-pb.lua"
 }
 
+if (-not (Test-Path -LiteralPath (Join-Path $projectDir $runtimeConfig))) {
+    throw "server config not found: $runtimeConfig"
+}
+
+Write-Host "Preset:  $presetName"
+Write-Host "Runtime: $runtime"
+Write-Host "Config:  $runtimeConfig"
+
 if ($Background) {
     New-Item -ItemType Directory -Path $pidDir -Force | Out-Null
     if (Test-Path -LiteralPath $pidPath) {
