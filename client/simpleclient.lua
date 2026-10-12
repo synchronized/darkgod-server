@@ -1,4 +1,4 @@
-local PATH, IP, USERNAME, PASSWORD, SKYUV_LUACLIB = ...
+local PATH, IP, USERNAME, PASSWORD, SKYUV_LUACLIB, MODULE_ROOT = ...
 
 IP = IP or "127.0.0.1"
 USERNAME = USERNAME or "sunday1"
@@ -11,6 +11,8 @@ package.path = table.concat({
 }, ";")
 local module_suffix = package.config:sub(1, 1) == "\\" and ".dll" or ".so"
 package.cpath = table.concat({
+		MODULE_ROOT and (MODULE_ROOT.."/common/luaclib/?"..module_suffix) or "",
+		MODULE_ROOT and (MODULE_ROOT.."/server/luaclib/?"..module_suffix) or "",
 		PATH.."/client/luaclib/?"..module_suffix,
 		PATH.."/common/luaclib/?"..module_suffix,
 		PATH.."/server/luaclib/?"..module_suffix,

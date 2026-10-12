@@ -22,10 +22,11 @@ if (-not $LuaPath) {
 if (-not $SkyuvLuaCpath) {
     $SkyuvLuaCpath = Join-Path $projectDir "3rd\skyuv\build\darkgod\3rd\portable\luaclib"
 }
+$moduleRoot = Join-Path $projectDir "build\$presetName\project\modules"
 if (-not (Test-Path -LiteralPath $LuaPath)) {
     throw "Lua interpreter not found. Build it with: cmake --build --preset $presetName --target skyuv_lua_interpreter"
 }
 
 & $LuaPath (Join-Path $projectDir "client\simpleclient.lua") `
-    $projectDir $Ip $Username $Password $SkyuvLuaCpath
+    $projectDir $Ip $Username $Password $SkyuvLuaCpath $moduleRoot
 exit $LASTEXITCODE

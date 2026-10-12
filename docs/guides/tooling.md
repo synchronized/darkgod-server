@@ -79,6 +79,15 @@ Ninja preset 的解释器位于 `3rd/skyuv/build/darkgod/3rd/lua.exe`。
 .\tool\client\start.ps1 -LuaPath "C:\tools\lua.exe"
 ```
 
+客户端也会自动使用当前 preset 的项目模块目录（例如 `pb.dll` 和 `cjson.dll`）。
+使用非默认 Windows preset 时同步指定：
+
+```powershell
+.\tool\client\start.ps1 -Preset windows-clang-debug
+```
+
+Linux/macOS 可通过 `DARKGOD_PRESET` 指定构建 preset。
+
 ## Redis
 
 默认使用两个本地实例：
