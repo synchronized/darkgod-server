@@ -1,0 +1,220 @@
+# 开发脚本与运行手册
+
+本文档说明项目当前推荐的构建、启动、停止和客户端测试流程。
+
+## 目录约定
+
+脚本按职责放在 `tool/` 下：
+
+```text
+tool/client/   客户端测试入口
+tool/redis/    Redis 配置与生命周期
+tool/server/   skyuv server 生命周期
+```
+
+运行产生的数据、PID 和日志不会提交到 Git：
+
+```text
+var/redis/     Redis 实例数据、配置和日志
+var/server/    server PID 和后台日志
+```
+
+## 构建
+
+Linux：
+
+```sh
+git submodule update --init --recursive
+cmake --preset linux-gcc-debug
+cmake --build --preset linux-gcc-debug --parallel 4
+```
+
+Windows PowerShell：
+
+```powershell
+git submodule update --init --recursive
+cmake --preset windows-vs2022-debug
+cmake --build --preset windows-vs2022-debug --parallel 4
+```
+
+如果只需要构建 skyuv 的客户端 socket 模块，可以构建：
+
+```powershell
+cmake --build --preset windows-vs2022-debug `
+  --target skyuv_portable_lua_module_client --parallel 4
+```
+
+## Redis
+
+默认使用两个本地实例：
+
+| 实例 | 地址 | 用途 |
+|---|---|---|
+| redis0 | `127.0.0.1:6379` | center |
+| redis1 | `127.0.0.1:6380` | group 1 |
+
+Linux：
+
+```sh
+# 生成配置；start.sh 也会自动执行
+tool/redis/setup.sh
+
+# 启动、查看状态、停止
+tool/redis/start.sh
+tool/redis/status.sh
+tool/redis/stop.sh
+```
+
+Windows：
+
+```powershell
+.\tool\redis\setup.ps1
+.\tool\redis\start.ps1 -Action Start
+.\tool\redis\status.ps1
+.\tool\redis\stop.ps1
+```
+
+如果 `redis-server.exe` 不在 `PATH`：
+
+```powershell
+.\tool\redis\start.ps1 -Action Start `
+  -RedisServerPath "C:\tools\Redis\redis-server.exe"
+```
+
+重置本地 Redis 数据前请确认不需要保留角色数据：
+
+```sh
+tool/redis/reset.sh
+```
+
+```powershell
+.\tool\redis\reset.ps1
+```
+
+也可以通过环境变量调整实例数量和起始端口：
+
+```sh
+REDIS_INSTANCE_COUNT=2 REDIS_BASE_PORT=6379 tool/redis/start.sh
+```
+
+PowerShell 使用脚本参数：
+
+```powershell
+.\tool\redis\start.ps1 -InstanceCount 2 -BasePort 6379
+```
+
+## Server
+
+### 前台启动
+
+前台启动适合开发调试，日志直接输出到当前终端。
+
+Linux：
+
+```sh
+tool/server/start.sh
+```
+
+Windows：
+
+```powershell
+.\tool\server\start.ps1
+```
+
+server 启动前需要确保 Redis 的 `6379` 和 `6380` 已经可用。
+
+### 后台启动
+
+后台模式的 PID 和日志位于 `var/server/`。
+
+Linux：
+
+```sh
+DARKGOD_BACKGROUND=1 tool/server/start.sh
+tool/server/status.sh
+tool/server/stop.sh
+```
+
+Windows：
+
+```powershell
+.\tool\server\start.ps1 -Background
+.\tool\server\status.ps1
+.\tool\server\stop.ps1
+```
+
+Windows 下如果希望 Redis 和 server 一起启动或停止：
+
+```powershell
+.\tool\server\start-all.ps1 -Background
+.\tool\server\stop-all.ps1
+```
+
+前台启动的 server 不由 `stop` 脚本管理，应直接在运行窗口按 `Ctrl+C` 停止。
+
+## 客户端连通性测试
+
+客户端会连接默认地址 `127.0.0.1:9777`，执行登录、角色和基础业务请求。
+
+Linux：
+
+```sh
+tool/client/start.sh
+```
+
+也可以指定 IP、用户名和密码：
+
+```sh
+tool/client/start.sh 127.0.0.1 sunday1 123456
+```
+
+Windows：
+
+```powershell
+.\tool\client\start.ps1
+.\tool\client\start.ps1 `
+  -Ip 127.0.0.1 -Username sunday1 -Password 123456
+```
+
+如果 Lua 解释器不在 skyuv 子模块默认路径：
+
+```powershell
+.\tool\client\start.ps1 `
+  -LuaPath "C:\tools\lua.exe" `
+  -SkyuvLuaCpath "D:\path\to\skyuv\build\darkgod\3rd\portable\luaclib"
+```
+
+客户端加载的是 skyuv 提供的 `client.socket`，因此首次使用前需要先构建该模块。
+
+## 推荐测试顺序
+
+```text
+构建项目
+  ↓
+启动 Redis
+  ↓
+确认 Redis 状态
+  ↓
+启动 server
+  ↓
+确认 server 状态（后台模式）
+  ↓
+启动客户端
+  ↓
+检查登录、角色和业务日志
+```
+
+常见检查：
+
+- Redis：`6379`、`6380` 均显示 `running`。
+- Server：后台模式下 `status` 显示 PID 和 `running`。
+- 客户端：没有 `module 'client.socket' not found`。
+- 登录失败：检查 Redis 日志和 server 日志。
+- 端口占用：确认 `9777`、`6379`、`6380` 没有被其他进程占用。
+
+## 脚本边界
+
+- `tool/redis/start.*` 会自动生成 Redis 配置。
+- `tool/server/start.*` 默认以前台模式运行，不会自动启动 Redis。
+- `tool/server/start-all.ps1` 只提供 Windows 下的 Redis + server 组合启动。
+- `tool/server/stop.*` 只管理后台模式写入的 server PID，不会强制终止任意同名进程。

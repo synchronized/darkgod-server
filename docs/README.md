@@ -18,6 +18,7 @@
 ### Guides
 
 - [使用 CMake 构建](guides/build-cmake.md)
+- [开发脚本与运行手册](guides/tooling.md)
 - [Windows 服务器启动](guides/server-windows.md)
 - [skyuv 迁移指南](guides/skyuv-migration.md)
 
