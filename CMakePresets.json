@@ -33,6 +33,14 @@
       }
     },
     {
+      "name": "toolchain-clang-cl",
+      "hidden": true,
+      "inherits": "base-ninja",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang-cl"
+      }
+    },
+    {
       "name": "platform-windows",
       "hidden": true,
       "condition": {
@@ -88,6 +96,26 @@
       "inherits": ["windows-skyuv", "config-release"]
     },
     {
+      "name": "windows-clang-cl",
+      "hidden": true,
+      "inherits": ["platform-windows", "toolchain-clang-cl"],
+      "cacheVariables": {
+        "DARKGOD_BUILD_PACKAGE": true,
+        "SKYUV_USE_SHARED_LIBUV": false,
+        "SKYUV_BUILD_TESTS": false
+      }
+    },
+    {
+      "name": "windows-clang-cl-debug",
+      "displayName": "Windows x64 clang-cl skyuv Debug",
+      "inherits": ["windows-clang-cl", "config-debug"]
+    },
+    {
+      "name": "windows-clang-cl-release",
+      "displayName": "Windows x64 clang-cl skyuv Release",
+      "inherits": ["windows-clang-cl", "config-release"]
+    },
+    {
       "name": "linux-gcc-debug",
       "displayName": "Linux GCC skyuv Debug",
       "inherits": ["base-ninja", "platform-linux", "config-debug"]
@@ -118,6 +146,14 @@
       "name": "windows-vs2022-release",
       "configurePreset": "windows-vs2022-release",
       "configuration": "Release"
+    },
+    {
+      "name": "windows-clang-cl-debug",
+      "configurePreset": "windows-clang-cl-debug"
+    },
+    {
+      "name": "windows-clang-cl-release",
+      "configurePreset": "windows-clang-cl-release"
     },
     {
       "name": "linux-gcc-debug",
