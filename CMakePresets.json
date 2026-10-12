@@ -33,11 +33,27 @@
       }
     },
     {
+      "name": "toolchain-msvc",
+      "hidden": true,
+      "inherits": "base-ninja",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "cl"
+      }
+    },
+    {
       "name": "toolchain-clang-cl",
       "hidden": true,
       "inherits": "base-ninja",
       "cacheVariables": {
         "CMAKE_C_COMPILER": "clang-cl"
+      }
+    },
+    {
+      "name": "toolchain-clang",
+      "hidden": true,
+      "inherits": "base-ninja",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang"
       }
     },
     {
@@ -116,6 +132,46 @@
       "inherits": ["windows-clang-cl", "config-release"]
     },
     {
+      "name": "windows-msvc",
+      "hidden": true,
+      "inherits": ["platform-windows", "toolchain-msvc"],
+      "cacheVariables": {
+        "DARKGOD_BUILD_PACKAGE": true,
+        "SKYUV_USE_SHARED_LIBUV": false,
+        "SKYUV_BUILD_TESTS": false
+      }
+    },
+    {
+      "name": "windows-msvc-debug",
+      "displayName": "Windows x64 MSVC skyuv Debug",
+      "inherits": ["windows-msvc", "config-debug"]
+    },
+    {
+      "name": "windows-msvc-release",
+      "displayName": "Windows x64 MSVC skyuv Release",
+      "inherits": ["windows-msvc", "config-release"]
+    },
+    {
+      "name": "windows-clang",
+      "hidden": true,
+      "inherits": ["platform-windows", "toolchain-clang"],
+      "cacheVariables": {
+        "DARKGOD_BUILD_PACKAGE": true,
+        "SKYUV_USE_SHARED_LIBUV": false,
+        "SKYUV_BUILD_TESTS": false
+      }
+    },
+    {
+      "name": "windows-clang-debug",
+      "displayName": "Windows x64 Clang skyuv Debug",
+      "inherits": ["windows-clang", "config-debug"]
+    },
+    {
+      "name": "windows-clang-release",
+      "displayName": "Windows x64 Clang skyuv Release",
+      "inherits": ["windows-clang", "config-release"]
+    },
+    {
       "name": "linux-gcc-debug",
       "displayName": "Linux GCC skyuv Debug",
       "inherits": ["base-ninja", "platform-linux", "config-debug"]
@@ -154,6 +210,22 @@
     {
       "name": "windows-clang-cl-release",
       "configurePreset": "windows-clang-cl-release"
+    },
+    {
+      "name": "windows-msvc-debug",
+      "configurePreset": "windows-msvc-debug"
+    },
+    {
+      "name": "windows-msvc-release",
+      "configurePreset": "windows-msvc-release"
+    },
+    {
+      "name": "windows-clang-debug",
+      "configurePreset": "windows-clang-debug"
+    },
+    {
+      "name": "windows-clang-release",
+      "configurePreset": "windows-clang-release"
     },
     {
       "name": "linux-gcc-debug",
