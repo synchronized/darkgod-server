@@ -44,6 +44,41 @@ cmake --build --preset windows-vs2022-debug `
   --target skyuv_portable_lua_module_client --parallel 4
 ```
 
+### 构建客户端 Lua 解释器
+
+项目的 CMake 构建会把 Lua 编译进 skyuv runtime，但不会生成独立的
+`lua.exe`。客户端脚本需要使用与 skyuv 相同源码树中的 Lua 5.5 解释器，
+首次使用客户端时需要额外构建它。
+
+Windows（MinGW）：
+
+```powershell
+Push-Location 3rd/skyuv/3rd/skynet/3rd/lua
+mingw32-make mingw
+Pop-Location
+```
+
+这会生成：
+
+```text
+3rd/skyuv/3rd/skynet/3rd/lua/lua.exe
+3rd/skyuv/3rd/skynet/3rd/lua/lua54.dll
+```
+
+Linux/macOS：
+
+```sh
+cd 3rd/skyuv/3rd/skynet/3rd/lua
+make
+cd -
+```
+
+如果解释器放在其他位置，可以通过 `-LuaPath` 显式指定：
+
+```powershell
+.\tool\client\start.ps1 -LuaPath "C:\tools\lua.exe"
+```
+
 ## Redis
 
 默认使用两个本地实例：
