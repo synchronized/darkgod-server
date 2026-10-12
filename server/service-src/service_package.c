@@ -5,6 +5,12 @@
 #include <string.h>
 #include <assert.h>
 
+#if defined(_WIN32)
+#define DARKGOD_SERVICE_API __declspec(dllexport)
+#else
+#define DARKGOD_SERVICE_API
+#endif
+
 #define TIMEOUT "1000"	// 10s
 
 struct response {
@@ -346,7 +352,7 @@ message_handler(struct skynet_context * ctx, void *ud, int type, int session, ui
 	return 0;
 }
 
-struct package *
+DARKGOD_SERVICE_API struct package *
 package_create(void) {
 	struct package * P = skynet_malloc(sizeof(*P));
 	memset(P, 0, sizeof(*P));
@@ -357,14 +363,14 @@ package_create(void) {
 	return P;
 }
 
-void
+DARKGOD_SERVICE_API void
 package_release(struct package *P) {
 	queue_exit(&P->request);
 	queue_exit(&P->response);
 	skynet_free(P);
 }
 
-int
+DARKGOD_SERVICE_API int
 package_init(struct package * P, struct skynet_context *ctx, const char * param) {
 	const char *args = param ? param : "";
 	unsigned int manager = 0;
