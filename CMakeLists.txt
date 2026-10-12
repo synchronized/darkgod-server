@@ -9,7 +9,6 @@ set(CMAKE_C_EXTENSIONS ON)
 option(DARKGOD_BUILD_CJSON "Build the cjson Lua module" ON)
 option(DARKGOD_BUILD_PB "Build the protobuf Lua module" ON)
 option(DARKGOD_BUILD_UUID "Build the uuid Lua module" ON)
-option(DARKGOD_BUILD_CLIENT_CRYPT "Build the client.crypt Lua module" ON)
 option(DARKGOD_BUILD_PACKAGE "Build the custom package Skynet service" OFF)
 set(DARKGOD_SKYUV_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/3rd/skyuv" CACHE PATH
     "skyuv source directory")
@@ -83,23 +82,6 @@ function(darkgod_configure_module target output_dir)
         ${DARKGOD_SKYUV_PLATFORM_TARGET}
     )
 endfunction()
-
-if(DARKGOD_BUILD_CLIENT_CRYPT)
-    add_library(darkgod_client_crypt MODULE
-        "${DARKGOD_SKYUV_ROOT}/3rd/skynet/lualib-src/lua-crypt.c"
-        "${DARKGOD_SKYUV_ROOT}/3rd/skynet/lualib-src/lsha1.c"
-    )
-    darkgod_configure_module(
-        darkgod_client_crypt
-        "${DARKGOD_SKYUV_BINARY_DIR}/3rd/portable/luaclib/client"
-    )
-    target_include_directories(darkgod_client_crypt PRIVATE
-        "${DARKGOD_SKYUV_ROOT}/src/compat/skynet/start"
-        "${DARKGOD_SKYUV_ROOT}/3rd/skynet/lualib-src"
-        "${DARKGOD_SKYUV_ROOT}/3rd/libuv/include"
-    )
-    set_target_properties(darkgod_client_crypt PROPERTIES OUTPUT_NAME crypt)
-endif()
 
 if(DARKGOD_BUILD_CJSON)
     add_library(darkgod_cjson MODULE

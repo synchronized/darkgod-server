@@ -41,7 +41,7 @@ cmake --build --preset windows-vs2022-debug --parallel 4
 
 ```powershell
 cmake --build --preset windows-vs2022-debug `
-  --target skyuv_portable_lua_module_client darkgod_client_crypt --parallel 4
+  --target skyuv_portable_lua_module_client --parallel 4
 ```
 
 ### 构建客户端 Lua 解释器
@@ -219,8 +219,9 @@ Windows：
   -SkyuvLuaCpath "D:\path\to\skyuv\build\darkgod\3rd\portable\luaclib"
 ```
 
-客户端加载 skyuv 提供的 `client.socket`，以及项目单独输出的 `client.crypt`。
-正常构建 preset 会生成这两个模块；如果只构建客户端模块，请使用上面的 target 命令。
+客户端加载 skyuv 提供的 `client.socket`。当前 skyuv 尚未单独输出
+`client.crypt`，虽然其源码已存在并被合并进 `skynet` 模块；需要向 skyuv
+提出独立 `client.crypt` target 的需求后，客户端才能完整使用这套 CMake 构建流程。
 
 ## 推荐测试顺序
 
