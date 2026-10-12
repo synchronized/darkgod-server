@@ -46,32 +46,32 @@ cmake --build --preset windows-vs2022-debug `
 
 ### 构建客户端 Lua 解释器
 
-项目的 CMake 构建会把 Lua 编译进 skyuv runtime，但不会生成独立的
-`lua.exe`。客户端脚本需要使用与 skyuv 相同源码树中的 Lua 5.5 解释器，
-首次使用客户端时需要额外构建它。
+skyuv 提供独立 Lua 解释器 target，使用与 skyuv runtime 相同的 Lua 版本。
+客户端首次使用前构建该 target 即可，不需要手动进入 skyuv 的 Lua 源码目录：
 
-Windows（MinGW）：
+Windows Visual Studio：
 
 ```powershell
-Push-Location 3rd/skyuv/3rd/skynet/3rd/lua
-mingw32-make mingw
-Pop-Location
+cmake --build --preset windows-vs2022-debug `
+  --target skyuv_lua_interpreter --parallel 4
 ```
 
-这会生成：
+Windows Clang/Clang-cl：
 
-```text
-3rd/skyuv/3rd/skynet/3rd/lua/lua.exe
-3rd/skyuv/3rd/skynet/3rd/lua/lua54.dll
+```powershell
+cmake --build --preset windows-clang-debug `
+  --target skyuv_lua_interpreter --parallel 4
 ```
 
 Linux/macOS：
 
 ```sh
-cd 3rd/skyuv/3rd/skynet/3rd/lua
-make
-cd -
+cmake --build --preset linux-gcc-debug --target skyuv_lua_interpreter --parallel 4
 ```
+
+Visual Studio preset 的解释器位于 `3rd/skyuv/build/darkgod/3rd/Debug/lua.exe`，
+Ninja preset 的解释器位于 `3rd/skyuv/build/darkgod/3rd/lua.exe`。
+`tool/client/start.ps1` 会按 preset 自动查找对应路径。
 
 如果解释器放在其他位置，可以通过 `-LuaPath` 显式指定：
 
