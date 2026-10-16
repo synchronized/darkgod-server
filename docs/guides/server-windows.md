@@ -3,7 +3,7 @@
 ## 运行前提
 
 - 已初始化 Git 子模块：`git submodule update --init --recursive`。
-- 已按 [CMake 构建指南](build-cmake.md) 构建 skyuv v0.2.0-beta.1 和项目模块。
+- 已按 [CMake 构建指南](build-cmake.md) 构建 skyuv v0.2.0 和项目模块。
 - 已安装 Windows 版本的 `redis-server.exe`，并将其加入 `PATH`，或者启动时通过
   `-RedisServerPath` 指定完整路径。
 

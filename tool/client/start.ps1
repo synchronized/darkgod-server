@@ -14,6 +14,7 @@ $projectDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $presetName = if ($Preset) { $Preset } else { "windows-vs2022-$($Configuration.ToLower())" }
 if (-not $LuaPath) {
     $luaCandidates = @(
+        (Join-Path $projectDir "3rd\skyuv\build\darkgod\project\bin\lua.exe"),
         (Join-Path $projectDir "3rd\skyuv\build\darkgod\3rd\$Configuration\lua.exe"),
         (Join-Path $projectDir "3rd\skyuv\build\darkgod\3rd\lua.exe")
     )

@@ -43,7 +43,7 @@ cmake --preset windows-vs2022-debug
 cmake --build --preset windows-vs2022-debug --parallel 4
 ```
 
-该模式参考 skyuv 的 `CMakePresets.json`，将 `3rd/skyuv` v0.2.0-beta.1 作为 CMake 子项目构建，并通过
+该模式参考 skyuv 的 `CMakePresets.json`，将 `3rd/skyuv` v0.2.0 作为 CMake 子项目构建，并通过
 `skyuv::lua`、`skyuv::platform` 和 `skyuv` 目标完成链接。
 skyuv 的子构建目录固定在 `3rd/skyuv/build/darkgod`，这是 skyuv 补丁流程要求的
 源码树内构建路径；该目录属于构建产物，不应提交。

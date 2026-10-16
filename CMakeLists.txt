@@ -55,6 +55,12 @@ if(TARGET skyuv)
         LIBRARY_OUTPUT_DIRECTORY "${DARKGOD_OUTPUT_BIN_PATH}"
         ARCHIVE_OUTPUT_DIRECTORY "${DARKGOD_OUTPUT_LIB_PATH}"
     )
+    # 覆盖 skyuv 的多配置输出设置，使启动脚本始终使用本项目的新运行时。
+    foreach(darkgod_config IN ITEMS DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
+        set_target_properties(skyuv PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY_${darkgod_config} "${DARKGOD_OUTPUT_BIN_DIR}"
+        )
+    endforeach()
 endif()
 if(MSVC)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
@@ -116,6 +122,9 @@ endif()
 
 if(DARKGOD_BUILD_PACKAGE)
     add_library(darkgod_package MODULE EXCLUDE_FROM_ALL server/service-src/service_package.c)
+    if(MSVC)
+        target_compile_options(darkgod_package PRIVATE /utf-8)
+    endif()
     target_include_directories(darkgod_package PRIVATE
         "${DARKGOD_SKYUV_PATCHED_SKYNET_INCLUDE_DIR}"
         "${DARKGOD_LUA_ROOT}"

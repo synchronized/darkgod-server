@@ -113,7 +113,7 @@ function cli:auth(args)
 	local username = crypt.desdecode(self.secret, crypt.base64decode(args.username))
 	local password = crypt.desdecode(self.secret, crypt.base64decode(args.password))
 
-	log ("<login> auth username: %s, password: %d", username, password)
+	log ("<login> auth username: %s", username)
 
 	local account = assert(skynet.call (database, "lua", "account", "load", username),
 						   string.format("load account username: %s failed", username))
